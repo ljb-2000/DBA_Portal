@@ -26,3 +26,8 @@ web framework "flask" from : http://flask.pocoo.org/
 
 web template from: http://jinja.pocoo.org/docs/dev/
 
+---
+
+If you have any suggestions, contact me!
+
+My Email: cdf4026176@aliyun.com
