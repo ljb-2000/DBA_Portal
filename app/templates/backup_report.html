@@ -1,0 +1,237 @@
+{% extends "frame.html" %}
+{% import "bootstrap_form.html" as btstrp %}
+{% set level1_name='backup' %}
+{% set level2_name='backup_report' %}
+{% block page_wrapper %}
+
+<script>
+  function show_this_server_type(server_type) {
+  var server_types = new Array("MySQL_cluster", "MongoDB", "MySQL_single");
+  for (var i=0; i< server_types.length; i++) {
+		   var server_div = document.getElementById('div_backup_' + server_types[i]);
+		   if (server_type == server_types[i]) {
+		   server_div.style.display="";
+		   }
+		   else {
+		   server_div.style.display="none";
+		   }
+		   }
+		   }
+		   </script>
+
+<!-- this is the main content section to be overwritten -->
+<div class="form-group" id="backup_date">
+  <form action="backup_report" method="GET" role="form">
+    <input id="backup_time" value="{{backup_date}}" onclick="laydate({istime: true, format: 'YYYY-MM-DD'})">
+    <input type="submit" id="submit" disabled="disabled" value="历史查询">
+    暂未开放...
+  </form>
+</div>
+
+
+<div class="row" id="div_backup_report" style="display:none">
+  <div class="col-lg-12">
+    {% if data['user_priv'] != 1 %}
+    {% set disabled = "disabled='disabled'" %}
+    {% else %}
+    {% set disabled = "" %}
+    {% endif %}
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <ul class="nav nav-tabs" id="tab_backup_report">
+        <li onclick="show_this_server_type('MySQL_cluster')" class="active"><a href="#">MySQL集群</a></li>
+        <li onclick="show_this_server_type('MySQL_single')"><a href="#">MySQL单实例</a></li>
+	<li onclick="show_this_server_type('MongoDB')"><a href="#">MongoDB</a></li>
+      </ul>
+    </div>
+
+    {% for type in ['MySQL_cluster', 'MySQL_single', 'MongoDB'] %}
+    {% if type == 'MySQL_cluster' %}
+    <div id="div_backup_{{type}}">
+      {% else %}
+      <div id="div_backup_{{type}}" style="display:none">
+	{% endif%}
+	<div id="cluster_backup_summary_{{type}}">
+	  <div class="col-lg-6">
+            <div class="table-responsive">
+	      {% if data[type] %}
+	      {% set table_data = data[type] %}
+	      <h3>备份总览</h3>
+	      {% set style_backup_summary_table = "font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border: solid black 1px;border-collapse: collapse;" %}
+	      <table class="backup_summary_table" id="table_summary_{{ type }}" style="{{style_backup_summary_table}}">
+		<thead>
+		  <tr>
+		    {% set style_backup_summary_table_th = "text-align:center; padding: 8px; background:#dedede; font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border: solid black 1px;" %}
+		    <th style="{{style_backup_summary_table_th}}">总共备份</th>
+		    <th style="{{style_backup_summary_table_th}}">成功</th>
+		    <th style="{{style_backup_summary_table_th}}">失败</th>
+		    <th style="{{style_backup_summary_table_th}}">尚未备份</th>
+		    <th style="{{style_backup_summary_table_th}}">备份机器</th>
+		    <th style="{{style_backup_summary_table_th}}">占用磁盘</th>
+		    <th style="{{style_backup_summary_table_th}}">磁盘使用率</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+		    {% set style_backup_summary_table_td = "text-align:center; padding: 8px; background:#ffffff; font-family: verdana,arial,sans-serif; font-size:15px; border: solid black 1px;" %}
+                    <td style="{{style_backup_summary_table_td}} color:#333333;">
+		      {{ table_data["total"] }}
+		    </td>
+                    <td style="{{style_backup_summary_table_td}} color:green;">{{ table_data["success"] }}</td>
+                    <td style="{{style_backup_summary_table_td}} color:red;font-weight:bold;">{{ table_data["failed"] }}</td>
+		    <td style="{{style_backup_summary_table_td}} color:blue;">{{ table_data["noback"] }}</td>
+                    <td style="{{style_backup_summary_table_td}}">{{ table_data["bak_server"] }}</td>
+		    <td style="{{style_backup_summary_table_td}}">{{ table_data["data_size"] }}</td>
+		    {% if table_data["disk_use"] >= '90%' %}
+    <td style="{{style_backup_summary_table_td}} color:red;font-weight:bold;">
+      {% else %}
+    <td style="{{style_backup_summary_table_td}}">
+      {% endif %}
+      {{ table_data["disk_use"] }}
+    </td>
+</tr>
+</tbody>
+</table>
+{% endif%}
+</div>
+</div>
+</div>
+
+<!-- cluster backup detail -->
+<div class="row" id="cluster_backup_detail_{{type}}">
+  <div class="col-lg-12">
+    {% if data[type] and data[type]['info'] %}
+    {% set table_data = data[type]['info'] %}
+    <br>
+    <h3>备份详细</h3>
+    <div id="detail_{{ type }}">
+      {% set style_backup_detail_table = "font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border:solid black 1px;border-collapse:collapse;" %}
+      <table class="table table-bordered table-hover" id="table_detail_{{ type }}" style="{{style_backup_detail_table}}">
+	<thead>
+	  <tr>
+	    {% set style_backup_detail_table_th = "text-align:center; padding: 8px; background:#7A9EAF; font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border: solid black 1px;" %}
+	    <th style="{{style_backup_detail_table_th}}">集群名</th>
+	    <th style="{{style_backup_detail_table_th}}">业务归属</th>
+	    <th style="{{style_backup_detail_table_th}}">结果</th>
+	    <th style="{{style_backup_detail_table_th}}">间隔(天)</th>
+	    <th style="{{style_backup_detail_table_th}}">开始</th>
+	    <th style="{{style_backup_detail_table_th}}">结束</th>
+	    <th style="{{style_backup_detail_table_th}}">耗时</th>
+	    <th style="{{style_backup_detail_table_th}}">保留(天)</th>
+	    <th style="{{style_backup_detail_table_th}}">文件名</th>
+	    <th style="{{style_backup_detail_table_th}}">大小</th>
+	  </tr>
+	</thead>
+	<tbody>
+	  {% for info in table_data %}
+	  {% for bu in info %}
+	  {% for ip_port in info[bu] %}
+	  {% set detail = info[bu][ip_port] %}
+	  <tr>
+	    {% set style_backup_detail_table_td = "text-align:center; padding: 8px; background:#ffffff; font-family: verdana,arial,sans-serif; font-size:15px; border: solid black 1px;" %}
+	    <td style="{{style_backup_detail_table_td}}">
+	      {{ ip_port }}
+	    </td>
+	    <td style="{{style_backup_detail_table_td}}">
+	      {% if detail['buss'] %}
+	      {{ detail['buss'] }}
+	      {% else %}
+	      -
+	      {% endif %}
+	    </td>
+	    {% if detail['status']=='失败' %}
+	    <td style="{{style_backup_detail_table_td}} color:red;font-weight:bold;">
+	      {% elif detail['status']=='未备份' %}
+	    <td style="{{style_backup_detail_table_td}} color:blue">
+	      {% else %}
+	    <td style="{{style_backup_detail_table_td}}">
+	      {% endif %}
+	      {{ detail['status'] }}
+	    </td>
+	    <td style="{{style_backup_detail_table_td}}">
+	      {{ detail['interval_time'] }}
+	    </td>
+	    {% if detail['status']=='成功' %}
+	    <td style="{{style_backup_detail_table_td}}">{{ detail['bak_begin_time'] }}</td>
+	    <td style="{{style_backup_detail_table_td}}">{{ detail['backup_time'] }}</td>
+	    <td style="{{style_backup_detail_table_td}}">{{ detail['cost_time'] }}</td>
+	    <td style="{{style_backup_detail_table_td}}">{{ detail['backup_keep'] }}</td>
+	    <td style="{{style_backup_detail_table_td}}">{{ detail['bak_file_name'] }}</td>
+	    <td style="{{style_backup_detail_table_td}}">{{ detail['backup_size'] }}</td>
+	    {% else %}
+	    <td style="{{style_backup_detail_table_td}}">-</td>
+	    <td style="{{style_backup_detail_table_td}}">-</td>
+	    <td style="{{style_backup_detail_table_td}}">-</td>
+	    <td style="{{style_backup_detail_table_td}}">-</td>
+	    <td style="{{style_backup_detail_table_td}}">-</td>
+	    <td style="{{style_backup_detail_table_td}}">-</td>
+	    {% endif %}
+	  </tr>
+	  {% endfor %}
+	  {% endfor %}
+	  {% endfor %}
+	</tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+</div>
+{% endfor %}
+</div>
+</div>
+
+
+{% endblock %}
+{% block script %}
+{{ super() }}
+<script>
+  $(document).ready(function () {
+  $('#tab_backup_report a:first').tab('show');//初始化显示哪个tab
+
+  $('#tab_backup_report a').click(function (e) {
+  $(this).tab('show');//显示当前选中的链接及关联的content
+  })
+  
+  var table_no_instance = $('#table_detail_MySQL_cluster').dataTable({
+  'bPaginate': false,
+  "aaSorting": [ 2, "asc" ],
+  'columns': [
+  {"orderable":false},
+  {"orderable":true},
+  {"orderable":true},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false},
+  ]
+  });
+
+
+  var table_no_instance = $('#table_detail_MongoDB').dataTable({
+  'bPaginate': false,
+  "aaSorting": [ 2, "asc" ],
+  'columns': [
+  {"orderable":false},
+  {"orderable":true},
+  {"orderable":true},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false},
+  ]
+  });
+
+  $('#div_backup_report').show();
+  
+  })
+
+</script>
+{% endblock %}

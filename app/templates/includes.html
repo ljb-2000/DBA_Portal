@@ -1,0 +1,86 @@
+<html lang="en">
+    {% block head %}
+    <head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>
+        {% if data %}
+            {{ 'DBA Portal - ' + data['page_name'] }}
+        {% endif %}
+    </title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- MetisMenu CSS -->
+    <link href="{{ url_for('static', filename='css/plugins/metisMenu/metisMenu.min.css') }}" rel="stylesheet">
+
+    <!-- Timeline CSS -->
+    <link href="{{ url_for('static', filename='css/plugins/timeline.css') }}" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/sb-admin-2.css') }}" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    <link href="{{ url_for('static', filename='css/plugins/morris.css') }}" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="{{ url_for('static', filename='font-awesome-4.1.0/css/font-awesome.min.css') }}" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename="css/plugins/dataTables.bootstrap.css") }}" rel="stylesheet">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    </head>
+    {% endblock %}
+
+    <body>
+        {% block realbody %}
+        {% endblock %}
+
+        {% block script %}
+        <!-- jQuery Version 1.11.0 -->
+        <script src="{{ url_for('static', filename='js/jquery-1.11.0.js') }}"></script>
+
+        <!-- Bootstrap Core JavaScript -->
+        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+
+        <!-- Metis Menu Plugin JavaScript -->
+        <script src="{{ url_for('static', filename='js/plugins/metisMenu/metisMenu.min.js') }}"></script>
+
+        {% if has_graph %}
+        <!-- Morris Charts JavaScript -->
+        <script src="{{ url_for('static', filename='js/plugins/morris/raphael.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/plugins/morris/morris.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/plugins/morris/morris-data.js') }}"></script>
+        {% endif %}
+
+        <!-- DataTables JavaScript -->
+        <script src="{{ url_for('static', filename='js/plugins/dataTables/jquery.dataTables.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/plugins/dataTables/dataTables.bootstrap.js') }}"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="{{ url_for('static', filename='js/sb-admin-2.js') }}"></script>
+
+        <!-- datetime picker JavaScript -->
+        <script src="{{ url_for('static', filename='js/plugins/laydate-v1.1/laydate/laydate.js') }}"></script>
+        {% endblock %}
+
+    </body>
+
+</html>

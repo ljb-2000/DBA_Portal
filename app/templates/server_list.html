@@ -1,0 +1,323 @@
+{% extends "frame.html" %}
+{% import "bootstrap_form.html" as btstrp %}
+{% set level1_name='cmdb' %}
+{% set level2_name='server_list' %}
+{% block page_wrapper %}
+
+<style type="text/css">
+  table.dataTable tbody tr.selected {
+  background-color: #eeeeee;
+  }
+  table.dataTable tbody tr td.radio{
+  background:url("../static/pic/notselected.png") no-repeat;
+  background-position: center;
+  width:15px;
+  }
+  table.dataTable tbody tr.selected td.radio{
+  background:url("../static/pic/selected.png") no-repeat;
+  background-position: center;
+  width:15px;
+  }
+</style>
+
+<script> 
+  function stopEventBubble(event){
+  var e=event || window.event;
+  if (e && e.stopPropagation){
+  e.stopPropagation();    
+  } else {
+  e.cancelBubble=true;
+  }
+  }
+
+  function formReset() {
+  $("#query_form").find("select, input, checkbox").val("");
+  }
+
+  function show_this_server_type(server_type) {
+  var server_types = new Array("no_instance","have_instance");
+  for (var i=0; i< server_types.length; i++) {
+		   var server_div = document.getElementById('div_' + server_types[i]);
+		   if (server_type == server_types[i]) {
+		   server_div.style.display="";
+		   }
+		   else {
+		   server_div.style.display="none";
+		   }
+		   }
+		   }
+		   
+		   </script> 
+
+<!-- this is the main content section to be overwritten -->
+<div class="row">
+  <div class="col-lg-12">
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <!-- Nav tabs -->
+	
+        <b>操作：</b>
+	{% if data['user_priv'] != 1 %}
+	{% set disabled = "disabled='disabled'" %}
+	{% else %}
+	{% set disabled = "" %}
+	{% endif %}
+        <a type="button" {{disabled}} class="btn btn-warning" id="button_install_mysql">部署MySQL</a> &nbsp;&nbsp; 
+        <a type="button" {{disabled}} class="btn btn-warning" id="button_install_mongodb">部署Mongodb</a> &nbsp;&nbsp; 
+        <a type="button" {{disabled}} class="btn btn-warning" id="button_install_memcache">部署Memcache</a> &nbsp;&nbsp; 
+	| &nbsp;&nbsp;
+	
+        <form id="query_form" role="form" class="form-inline" action="{{ url_for('server_list') }}" method="GET" style="margin-bottom:0px; display: inline">
+          {%  set form = data['filter_form'] %}
+          {{ btstrp.render_field(form.idc, label_visible=true, value=form['idc']) }}
+          {{ btstrp.render_field(form.ram_size, label_visible=true, value=form['ram_size']) }}
+          {{ btstrp.render_field(form.logic_cpu_count, label_visible=true, value=form['logic_cpu_count']) }}
+          &nbsp;&nbsp;&nbsp;<button type="submit" class="btn btn-primary">查询</button>
+          <a class="btn btn-primary" onclick="formReset()">重置</a>
+        </form>
+      </div>
+      <!-- /.panel-heading -->
+      
+      <div class="tab-content">
+        <!-- Tab panes -->
+	<ul class="nav nav-tabs" id="myTab">
+          <li class="active" onclick="show_this_server_type('no_instance')"><a href="#no_instance">未安装实例的服务器</a></li>
+          <li onclick="show_this_server_type('have_instance')"><a href="#have_instance">已安装实例的服务器</a></li>
+	</ul>
+      </div>
+
+      <div class="panel-body" id="all_servers" style="display:none">
+        {% for server_type in ['no_instance','have_instance'] %}
+
+	{% set server_list = server_type + '_list'%}
+	{% set server_div = 'div_' + server_type %}
+	{% if server_type == 'no_instance' %}
+	{% set server_type_name = '未安装实例的服务器' %}
+	{% elif server_type == 'have_instance' %}
+	{% set server_type_name = '已安装实例的服务器' %}
+	{% endif %}
+	{% if server_type != 'no_instance' %}
+	<div id={{ server_div }} style="display:none">
+	  {% else %}
+	  <div id={{ server_div }}>
+	    {% endif %}
+	    <table class="table table-bordered table-hover" id={{server_list}}>
+              <thead>
+		<tr>
+		  <th></th><th>IP</th><th>主机名</th><th>环境</th><th>机房</th><th>机架位置</th><th>状态</th><th>CPU</th><th>内存</th><th>硬盘</th><th>负责人</th>
+		  {% if server_type == 'no_instance' %}
+		  <th>操作</th>
+		  {% endif %}
+		</tr>
+              </thead>
+              <tbody>
+		{%  if data['page_data'] and data['page_data'][server_type] %}
+		{% set table_data = data['page_data'][server_type] %}
+		{% for row in table_data | sort(reverse=True, attribute='recently_apply') %}
+		{% set color = '' %}
+		{% if row['recently_apply']==1 %}
+		{% set color = 'lightyellow' %}
+		{% endif %}
+		<tr id="{{ row["private_ip"] }}" style="background:{{ color }}">
+		  <td style="text-align:center" class="radio">
+		  </td>
+                  <td>
+                    {% if row["private_ip"] %}
+                    <a href="{{ url_for('server_info', server_id=row['sn']) }}" type="button" class="btn btn-info btn-xs" onclick="stopEventBubble()">
+                      {{ row["private_ip"] }}
+                    </a>
+                    {% endif %}
+                  </td>
+                  <td style="">
+                    {% if row["hostname"] %}
+                    {{ row["hostname"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["env"] %}
+                    {{ row['env'] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["idc"] %}
+                    {{ row["idc"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["rack_location"] %}
+                    {{ row["rack_location"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["status"] and row["server_status"]=="在线" %}
+                    {{ row["status"] }}
+                    {% elif row["status"]=="下线" %}
+                    {{ row["status"] }}
+                    {% else %}
+                    {{ row["status"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["logic_cpu_count"] %}
+                    {{ row["logic_cpu_count"] }}核
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["ram_size"] %}
+                    {{ row["ram_size"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["raid"] %}
+                    {{ row["raid"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["dba_owner"] %}
+                    {{ row["dba_owner"] }}
+		    {% endif %}
+                  </td>
+		  {% if server_type == 'no_instance' %}
+		  <td>
+		    <a href="{{ url_for('operate_server',operate_type='offline',server_id=row['private_ip']) }}" type="button" class="btn btn-danger btn-xs dropdown-toggle" onclick="return confirm('确认下线')">
+                      下线
+                    </a>
+		  </td>
+		  {% endif %}
+		</tr>
+		{% endfor %}
+		{% endif %}
+              </tbody>
+            </table>
+	  </div>
+          {% endfor %}
+	</div>
+      </div>
+    </div>
+    <!-- /.col-lg-12 -->
+  </div>
+  <!-- /.row -->
+  {% endblock %}
+  {% block script %}
+  {{ super() }}
+  <script>
+    $(document).ready(function() {
+    var table_no_instance = $('#no_instance_list').dataTable({
+    'bPaginate': true,
+    'oLanguage': {
+    'sLengthMenu': '每页显示 _MENU_ 条记录',
+    'sSearch': '查询：',
+    'sInfo': '从 _START_ 到 _END_ / 共 _TOTAL_ 条记录',
+    'oPaginate': {
+    'sFirst': '首页',
+    'sPrevious': '上一页',
+    'sNext': '下一页',
+    'sLast': '尾页'
+    },
+    },
+    'columns': [
+    {"orderable":false},
+    {"orderable":true},
+    {"orderable":false},
+    {"orderable":false},
+    {"orderable":false},
+    {"orderable":false},
+    {"orderable":false},
+    {"orderable":true},
+    {"orderable":true},
+    {"orderable":false},
+    {"orderable":true},
+    {"orderable":false}
+    ]
+    });
+
+    var table_have_instance = $('#have_instance_list').dataTable({
+    'bPaginate': true,
+    'oLanguage': {
+    'sLengthMenu': '每页显示 _MENU_ 条记录',
+    'sSearch': '查询：',
+    'sInfo': '从 _START_ 到 _END_ / 共 _TOTAL_ 条记录',
+    'oPaginate': {
+    'sFirst': '首页',
+    'sPrevious': '上一页',
+    'sNext': '下一页',
+    'sLast': '尾页'
+    },
+    },
+    'columns': [
+    {"orderable":false},
+    {"orderable":true},
+    {"orderable":false},
+    {"orderable":false},
+    {"orderable":false},
+    {"orderable":false},
+    {"orderable":false},
+    {"orderable":true},
+    {"orderable":true},
+    {"orderable":false},
+    {"orderable":true}
+    ]
+    });
+    $('#all_servers').show();
+
+    $('#no_instance_list tbody').on( 'click', 'tr', function() {
+    if ( $(this).hasClass('selected') ) {
+    $(this).removeClass('selected');
+    }
+    else {
+    $("#no_instance_list > tbody tr").each(function(){ 
+    if ($(this).hasClass('selected')) {
+    $(this).removeClass('selected');
+    }
+    });
+    $("#have_instance_list > tbody tr").each(function(){ 
+    if ($(this).hasClass('selected')) {
+    $(this).removeClass('selected');
+    }
+    });
+    $(this).addClass('selected');
+    }
+    });
+
+    $('#have_instance_list tbody').on( 'click', 'tr', function () {
+    if ( $(this).hasClass('selected') ) {
+    $(this).removeClass('selected');
+    }
+    else {
+    $("#no_instance_list > tbody tr").each(function(){ 
+    if ($(this).hasClass('selected')) {
+    $(this).removeClass('selected');
+    }
+    });
+    $("#have_instance_list > tbody tr").each(function(){ 
+    if ($(this).hasClass('selected')) {
+    $(this).removeClass('selected');
+    }
+    });
+    $(this).addClass('selected');
+    }
+    });
+    
+    $(function () {
+    $('#myTab a:first').tab('show');//初始化显示哪个tab
+    
+    $('#myTab a').click(function (e) {
+    $(this).tab('show');//显示当前选中的链接及关联的content
+    })
+    })
+
+    $('#button_install_mysql').click( function () {
+    window.location.href="{{ url_for('install_db',db_type='mysql') }}?serverid="+$('tr.selected').attr("id");
+    } );
+
+    $('#button_install_mongodb').click( function () {
+    window.location.href="{{ url_for('install_db',db_type='mongodb') }}?serverid="+$('tr.selected').attr("id");
+    } );
+
+    $('#button_install_memcache').click( function () {
+    window.location.href="{{ url_for('install_db',db_type='memcache') }}?serverid="+$('tr.selected').attr("id");
+    } );
+
+    });
+  </script>
+  {% endblock %}

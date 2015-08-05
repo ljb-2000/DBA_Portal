@@ -1,0 +1,219 @@
+{% extends "frame.html" %}
+{% import "bootstrap_form.html" as btstrp %}
+{% set level1_name='cmdb' %}
+{% set level2_name='server_list' %}
+{% block page_wrapper %}
+
+<script>
+  function check_input(my_data) {
+  var re = /^[0-9]+$/
+  if (my_data.buss.value == "") {
+  alert("请选择产品线");
+  my_data.buss.focus();
+  return false;
+  }
+  if (my_data.port.value == "") {
+  alert("请选择端口");
+  my_data.port.focus();
+  return false;
+  }
+  if (my_data.version.value == "") {
+  alert("请选择Mongodb版本");
+  my_data.version.focus();
+  return false;
+  }
+  if (my_data.dba_owner.value == "") {
+  alert("请选择负责人");
+  my_data.dba_owner.focus();
+  return false;
+  }
+  }
+
+</script>
+<!-- this is the main content section to be overwritten -->
+<div class="row">
+  <div class="col-lg-12">
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <!-- Nav tabs -->
+	<b>确认您选择的服务器：</b>
+      </div>
+      <!-- /.panel-heading -->
+      <div class="panel-body">
+        <!-- Tab panes -->
+        <div class="col-lg-7">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="serverlist">
+              <thead>
+                <tr><th>IP</th><th>主机名</th><th>机房</th><th>CPU</th><th>内存</th><th>存储</th></tr>
+              </thead>
+              <tbody>
+                {%  if data['page_data']  %}
+                {% set table_data = data['page_data']|sort(attribute='private_ip') %}
+                {% for row in table_data %}
+                <tr>
+                  <td>
+                    {% if row["private_ip"] %}
+                    <a href="{{ url_for('server_info', server_id = row['sn']) }}" type="button" class="btn btn-info btn-xs">
+                      {{ row["private_ip"] }}
+                    </a>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["hostname"] %}
+                    {{ row["hostname"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["idc"] %}
+                    {{ row["idc"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["logic_cpu_count"] %}
+                    {{ row['logic_cpu_count'] }}核
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["ram_size"] %}
+                    {{ row["ram_size"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["raid"] %}
+                    {{ row['raid'] }}
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+	
+	<!-- instance on this server -->
+	<div class="col-lg-5">
+	  <div class="table-responsive">
+	    <table class="table table-bordered table-hover" id="instlist">
+	      <thead>
+		<tr><th>端口</th><th>类型</th><th>业务负责人</th><th>DBA</th><th>状态</th></tr>
+	      </thead>
+	      <tbody>
+		{%  if data['instance_data']  %}
+		{% set table_data = data['instance_data']|sort(attribute='port') %}
+		{% for row in table_data %}
+		<tr >
+		  <td>
+		    {% if row["port"] %}
+		    {{ row["port"] }}
+		    {% endif %}
+		  </td>
+		  <td>
+		    {% if row["type"] %}
+		    {{ row['type'] }}
+		    {% endif %}
+		  </td>
+		  <td>
+		    {% if row["jon_owner"] %}
+		    {{ row["jon_owner"] }}
+		    {% endif %}
+		  </td>
+		  <td>
+		    {% if row["dba_owner"] %}
+		    {{ row["dba_owner"] }}
+		    {% endif %}
+		  </td>
+		  <td>
+		    {% if row["status"] and row["status"]=="在线" %}
+		    {{ row["status"] }}
+		    {% elif row["status"]=="下线" %}
+		    {{ row["status"] }}
+		    {% else %}
+		    {{ row["status"] }}
+		    {% endif %}
+		  </td>
+		</tr>
+		{% endfor %}
+		{% endif %}
+	      </tbody>
+	    </table>
+	  </div>
+        </div>
+	<!-- instance on this server -->
+	
+      </div>
+    </div>
+  </div>
+  <!-- /.col-lg-12 -->
+  <div class="col-lg-12">
+    <form role="form" action="{{ url_for('install_result',db_type=data['db_type']) }}" method="GET" onsubmit="return check_input(this)">
+      <div class="row">
+	{%  set form = data['form'] %}
+	<div class="form-group col-lg-3">
+          {{ btstrp.render_field(form.buss) }}
+        </div>
+	<div class="form-group col-lg-3">
+          {{ btstrp.render_field(form.port) }}
+        </div>
+        <div class="form-group col-lg-3">
+          {{ btstrp.render_field(form.version) }}
+        </div>
+        <div hidden="hidden" class="form-group col-lg-3">
+          {{ btstrp.render_field(form.mem) }}
+        </div>
+        <div class="form-group col-lg-3">
+          {{ btstrp.render_field(form.dba_owner) }}
+        </div>
+        <div class="form-group col-lg-3">
+          {{ btstrp.render_field(form.comment) }}
+        </div>
+        <div class="form-group col-lg-3">
+          {{ btstrp.render_field(form.replSet) }}
+        </div>
+        <div class="form-group col-lg-3">
+          {{ btstrp.render_checkbox_field(form.backup) }}
+        </div>
+        <div class="form-group col-lg-3">
+          {{ btstrp.render_checkbox_field(form.zabbix) }}
+        </div>
+	<input class="form-control" id="db_type" name="db_type"  type="hidden" value="MongoDB" }}>
+	<input class="form-control" id="server_sn" name="server_sn" type="hidden"  value={{ data['page_data'][0]['sn'] }}>
+	<input class="form-control" id="server_ip" name="server_ip" type="hidden" value={{ data['page_data'][0]['private_ip'] }}>
+	<input class="form-control" id="server_id" name="server_id" type="hidden" value={{ data['page_data'][0]['sn'] }}>
+	<input class="form-control" id="server_dev" name="server_dev" type="hidden" value={{ data['page_data'][0]['dev'] }}>
+	<input class="form-control" id="user_code" name="code" type="hidden" value={{ data['user_code'] }}>
+      </div>
+      <div class="row">
+	<br/>
+	<button type="submit" class="btn btn-success">提交</button>
+	<a href="{{ url_for('server_list') }}" type="button" class="btn btn-default">取消</a>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- /.row -->
+{% endblock %}
+{% block script %}
+{{ super() }}
+<script>
+  $(document).ready(function() {
+  $('#serverlist').dataTable({
+  "bSort": false,
+  "bFilter": false, 
+  "bPaginate": false,
+  "bInfo": false,
+  "iDisplayLength":10,
+	"bLengthChange":false,
+  });
+  $('#instlist').dataTable({
+  "bSort": false,
+  "bFilter": false, 
+        "bPaginate": false,
+  "bInfo": false,
+  "iDisplayLength":10,
+  "bLengthChange":false,
+  });
+  });
+</script>
+{% endblock %}

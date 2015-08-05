@@ -1,0 +1,47 @@
+{% extends "frame.html" %}
+{% set level1_name='cmdb' %}
+{% import "bootstrap_form.html" as btstrp %}
+{% block page_wrapper %}
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    Please input information for system initial
+                </div>
+                <div class="panel-body">
+                    <form role="form" action="{{ url_for('init_system', server_id = data['page_data']['server_id']) }}" method="POST">
+                            {%  set form = data['form'] %}
+                            <div class="form-group">
+                                {{ btstrp.render_field(form.server_id, label_visible=true, value=data['page_data']['server_id'], readonly="readonly") }}
+                            </div>
+                            <div class="form-group">
+                                {{ btstrp.render_field(form.server_ip, label_visible=true, value=data['page_data']['server_ip'], readonly="readonly") }}
+                            </div>
+                            <div class="form-group">
+                                {{ btstrp.render_field(form.mirror, label_visible=true, value=data['page_data']['mirror']) }}
+                            </div>
+                            <div class="form-group">
+                                {{ btstrp.render_field(form.comment, label_visible=true, value=data['page_data']['comment']) }}
+                            </div>
+                            <button type="submit" class="btn btn-success">Init</button>
+                            <a href="{{ url_for('server_info', server_id=data['page_data']['server_id']) }}" type="button" class="btn btn-default">Back</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Server Info for: {{ data['page_data']['server_id'] }}
+                </div>
+                <div class="panel-body">
+                     <dl class="dl-horizontal">
+                         {% for key, value in data['page_data'].iteritems() %}
+                                <dt>{{ key }}</dt>
+                                <dd>{{ value }}</dd>
+                         {% endfor %}
+                     </dl>
+                </div>
+            </div>
+    </div>
+{% endblock %}

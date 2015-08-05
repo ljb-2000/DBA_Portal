@@ -1,0 +1,253 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="description" content="">
+    <meta name="author" content="">
+  </head>
+  
+  <body>
+    
+    <div class="start_div_email_backup_report">
+      <div class="col-lg-12">
+	<div class="panel panel-info">
+	  <div class="panel-heading">
+	  </div>
+
+	  <div id="backup_report_summary">
+	    {% for type in ['MySQL_cluster','MySQL_single', 'MongoDB', 'File_Backup'] %}
+            <div class="col-lg-6">
+              <div class="table-responsive">
+		{% if data[type] %}
+		{% set table_data = data[type] %}
+		<h3>{{ data[type]['title'] }}备份总览</h3>
+		{% set style_backup_summary_table = "font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border: solid black 1px;border-collapse: collapse;" %}
+		<table class="backup_summary_table" id="table_summary_{{ type }}" style="{{style_backup_summary_table}}">
+		  <thead>
+		    <tr>
+		      {% set style_backup_summary_table_th = "text-align:center; padding: 8px; background:#dedede; font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border: solid black 1px;" %}
+		      <th style="{{style_backup_summary_table_th}}">总共备份</th>
+		      <th style="{{style_backup_summary_table_th}}">成功</th>
+		      <th style="{{style_backup_summary_table_th}}">失败</th>
+		      <th style="{{style_backup_summary_table_th}}">尚未备份</th>
+		      <th style="{{style_backup_summary_table_th}}">备份机器</th>
+		      <th style="{{style_backup_summary_table_th}}">占用磁盘</th>
+		      <th style="{{style_backup_summary_table_th}}">磁盘使用率</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+                    <tr>
+		      {% set style_backup_summary_table_td = "text-align:center; padding: 8px; background:#ffffff; font-family: verdana,arial,sans-serif; font-size:15px; border: solid black 1px;" %}
+                      <td style="{{style_backup_summary_table_td}} color:#333333;">
+			{% if table_data["total"] != '' %}
+			{{ table_data["total"] }}
+			{% endif %}
+		      </td>
+                      <td style="{{style_backup_summary_table_td}} color:green;">
+			{% if table_data["success"] != '' %}
+			{{ table_data["success"] }}
+			{% endif %}
+		      </td>
+                      <td style="{{style_backup_summary_table_td}} color:red;font-weight:bold;">
+			{% if table_data["failed"] != '' %}
+			{{ table_data["failed"] }}
+			{% endif %}
+		      </td>
+		      <td style="{{style_backup_summary_table_td}} color:blue;">
+			{% if table_data["noback"] != '' %}
+			{{ table_data["noback"] }}
+			{% endif %}
+		      </td>
+                      <td style="{{style_backup_summary_table_td}}">
+			{% if table_data["bak_server"] != '' %}
+			{{ table_data["bak_server"] }}
+			{% endif %}
+		      </td>
+		      <td style="{{style_backup_summary_table_td}}">
+			{% if table_data["data_size"] != '' %}
+			{{ table_data["data_size"] }}
+			{% endif %}
+		      </td>
+		      {% if table_data["disk_use"] %}
+		      {% if table_data["disk_use"] >= '90%' %}
+		      <td style="{{style_backup_summary_table_td}} color:red;font-weight:bold;">
+			{% else %}
+		      <td style="{{style_backup_summary_table_td}}">
+			{% endif %}
+			{{ table_data["disk_use"] }}
+			{% else %}
+			<td>
+			  {% endif %}
+		      </td>
+                    </tr>
+		  </tbody>
+		</table>
+		{% endif%}
+              </div>
+            </div>
+	    {% endfor %}
+	  </div>
+	</div>
+	
+	<!-- cluster backup detail -->
+	<div class="row" id="cluster_backup_report_detail">
+	  <div class="col-lg-12">
+	    {% for type in ['MySQL_cluster', 'MySQL_single', 'MongoDB'] %}
+	    {% if data[type] and data[type]['info'] %}
+	    {% set table_data = data[type]['info'] %}
+	    <h3>{{ data[type]['title'] }}备份详细信息</h3>
+	    <div id="detail_{{ type }}">
+	      {% set style_backup_detail_table = "font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border:solid black 1px;border-collapse:collapse;" %}
+	      <table class="backup_detail_table" id="table_detail_{{ type }}" style="{{style_backup_detail_table}}">
+		<thead>
+		  <tr>
+		    {% set style_backup_detail_table_th = "text-align:center; padding: 8px; background:#7A9EAF; font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border: solid black 1px;" %}
+		    <th style="{{style_backup_detail_table_th}}">集群名</th>
+		    <th style="{{style_backup_detail_table_th}}">业务归属</th>
+		    <th style="{{style_backup_detail_table_th}}">结果</th>
+		    <th style="{{style_backup_detail_table_th}}">间隔(天)</th>
+		    <th style="{{style_backup_detail_table_th}}">备份时间</th>
+		    <th style="{{style_backup_detail_table_th}}">耗时</th>
+		    <th style="{{style_backup_detail_table_th}}">保留(天)</th>
+		    <th style="{{style_backup_detail_table_th}}">大小</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  {% for info in table_data %}
+		  {% for bu in info %}
+		  {% for ip_port in info[bu] %}
+		  {% set detail = info[bu][ip_port] %}
+		  <tr>
+		    {% set style_backup_detail_table_td = "text-align:center; padding: 8px; background:#ffffff; font-family: verdana,arial,sans-serif; font-size:15px; border: solid black 1px;" %}
+		    <td style="{{style_backup_detail_table_td}}">
+		      {{ ip_port }}
+		    </td>
+		    <td style="{{style_backup_detail_table_td}}">
+		      {% if detail['buss'] != '' %}
+		      {{ detail['buss'] }}
+		      {% else %}
+		      -
+		      {% endif %}
+		    </td>
+		    {% if detail['status']=='失败' %}
+		    <td style="{{style_backup_detail_table_td}} color:red;font-weight:bold;">
+		      {% elif detail['status']=='未备份' %}
+		    <td style="{{style_backup_detail_table_td}} color:blue">
+                      {% else %}
+		    <td style="{{style_backup_detail_table_td}}">
+		      {% endif %}
+		      {{ detail['status'] }}
+		    </td>
+		    <td style="{{style_backup_detail_table_td}}">
+		      {{ detail['interval_time'] }}
+		    </td>
+		    <td style="{{style_backup_detail_table_td}}">
+		      {% if detail['status']=='成功' %}
+		      {{ detail['backup_time'] }}
+		      {% else %}
+		      -
+		      {% endif %}
+		    </td>
+		    <td style="{{style_backup_detail_table_td}}">
+		      {% if detail['status']=='成功' %}
+		      {{ detail['cost_time'] }}
+		      {% else %}
+		      -
+		      {% endif %}
+		    </td>
+		    <td style="{{style_backup_detail_table_td}}">
+		      {{ detail['backup_keep'] }}
+		    </td>
+		    <td style="{{style_backup_detail_table_td}}">
+		      {% if detail['status']=='成功' %}
+		      {{ detail['backup_size'] }}
+		      {% else %}
+		      -
+		      {% endif %}
+		    </td>
+		  </tr>
+		  {% endfor %}
+		  {% endfor %}
+		  {% endfor %}
+		</tbody>
+	      </table>
+	    </div>
+	    {% endif %}
+	    {% endfor %}
+
+
+	    {% for type in ['File_Backup'] %}
+	    {% if data[type] and data[type]['info'] %}
+	    {% set table_data = data[type]['info'] %}
+	    <h3>{{ data[type]['title'] }}备份详细信息</h3>
+	    <div id="detail_{{ type }}">
+	      {% set style_backup_detail_table = "font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border:solid black 1px;border-collapse:collapse;" %}
+	      <table class="backup_detail_table" id="table_detail_{{ type }}" style="{{style_backup_detail_table}}">
+		<thead>
+		  <tr>
+		    {% set style_backup_detail_table_th = "text-align:center; padding: 8px; background:#7A9EAF; font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border: solid black 1px;" %}
+		    <th style="{{style_backup_detail_table_th}}">文件名</th>
+		    <th style="{{style_backup_detail_table_th}}">所在机器</th>
+		    <th style="{{style_backup_detail_table_th}}">备份种类</th>
+		    <th style="{{style_backup_detail_table_th}}">大小</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  {% for f_backup in table_data %}
+		  {% set detail = f_backup %}
+		  <tr>
+		    {% set style_backup_detail_table_td = "text-align:center; padding: 8px; background:#ffffff; font-family: verdana,arial,sans-serif; font-size:15px; border: solid black 1px;" %}
+		    <td style="{{style_backup_detail_table_td}}">
+		      {% if detail['file_name'] != '' %}
+		      {{ detail['file_name'] }}
+		      {% else %}
+		      -
+		      {% endif %}
+		    </td>
+		    <td style="{{style_backup_detail_table_td}}">
+		      {% if detail['bak_keep_host'] != '' %}
+		      {{ detail['bak_keep_host'] }}
+		      {% else %}
+		      -
+		      {% endif %}
+		    </td>
+		    <td style="{{style_backup_detail_table_td}}">
+		      {% if detail['name'] != '' %}
+		      {{ detail['name'] }}
+		      {% else %}
+		      -
+		      {% endif %}
+		    </td>
+		    <td style="{{style_backup_detail_table_td}}">
+		      {% if detail['file_size'] != '' %}
+		      {{ detail['file_size'] }}
+		      {% else %}
+		      -
+		      {% endif %}
+		    </td>
+		  </tr>
+		  {% endfor %}
+		</tbody>
+	      </table>
+	    </div>
+	    {% endif %}
+	    {% endfor %}
+
+
+	  </div>
+	</div>
+
+
+      </div>
+    </div>
+    <br>
+    <div id="backup_time" style="font-size:13px; font-weight:200">
+      <a href="http://portal.dba.dp/backup_report" target="_blank">详情请点击数据库备份日报</a>
+    </div>
+  </body>
+</html>

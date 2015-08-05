@@ -1,0 +1,123 @@
+{% extends 'frame.html' %}
+{% set level1_name = 'dashboard' %}
+{% block page_wrapper %}
+<div class="row">
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-comments fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{ data['page_data']['server_cnt'] }}</div>
+                        <div>Servers</div>
+                    </div>
+                </div>
+            </div>
+            <a href="{{ url_for('server_list') }}">
+                <div class="panel-footer">
+                    <span class="pull-left">View Details</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-tasks fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{ data['page_data']['instance_cnt'] }}</div>
+                        <div>Instances</div>
+                    </div>
+                </div>
+            </div>
+            <a href="{{ url_for('instance_list') }}">
+                <div class="panel-footer">
+                    <span class="pull-left">View Details</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-yellow">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-shopping-cart fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">0</div>
+                        <div>MMM Groups</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#">
+                <div class="panel-footer">
+                    <span class="pull-left">View Details</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="panel panel-red">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-support fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">0</div>
+                        <div>Schemas</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#">
+                <div class="panel-footer">
+                    <span class="pull-left">View Details</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="jumbotron">
+            <h1>DBA Portal Release 1.0</h1>
+            <p>
+                <h4>Release 1.0</h4>
+                <ul>
+                    <li>服务器列表
+                        <ul>
+                            <li>新增服务器</li>
+                            <li>服务器信息修改</li>
+                            <li>一键重装服务器</li>
+                            <li>服务器IP、DBA负责人、hostname、CMDB信息、硬件配置信息统一展示</li>
+                        </ul>
+                    </li>
+                    <li>实例列表
+                        <ul>
+                            <li>新增实例</li>
+                            <li>实例信息修改</li>
+                            <li>DBA负责人、CMDB信息统一展示</li>
+                        </ul>
+                    </li>
+                </ul>
+            </p>
+        </div>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+
+{% endblock %}

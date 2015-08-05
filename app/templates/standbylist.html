@@ -1,0 +1,199 @@
+{% extends "frame.html" %}
+{% import "bootstrap_form.html" as btstrp %}
+{% set level1_name='cmdb' %}
+{% set level2_name='standby_list' %}
+{% block page_wrapper %}
+
+<script>
+
+  function apply(){
+  var checkedServer = new Array();  
+  var a=document.getElementsByTagName("input");
+  for(var i=0;i<a.length;i++){
+		  if(a[i].type=='checkbox'){
+		  if(a[i].checked==true){
+		  checkedServer.push(a[i].id);
+		  }
+		  }
+		  }
+		  window.location.href="{{ url_for('applyserver') }}?serverid="+checkedServer;
+		  }
+
+		  function stopEventBubble(event){
+		  var e=event || window.event;
+		  if (e && e.stopPropagation){
+		  e.stopPropagation();    
+		  } else {
+		  e.cancelBubble=true;
+		  }
+		  }
+
+		  function change(checkboxid){
+		  checkbox=document.getElementById(checkboxid);
+		  if( checkbox.checked == true) {
+		  checkbox.checked=false; 
+		  } else {
+		  checkbox.checked=true;
+		  }
+		  } 
+
+		  function formReset() {
+		  $("#query_form").find("select, input, checkbox").val("");
+		  }
+
+		  </script>
+
+<!-- this is the main content section to be overwritten -->
+<div class="row">
+  <div class="col-lg-12">
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <!-- Nav tabs -->
+
+        <b>操作：</b>
+        {% if data['user_priv'] != 1 %}
+	{% set disabled = "disabled='disabled'" %}
+	{% else %}
+	{% set disabled = "" %}
+	{% endif %}
+	<a type="button" {{disabled}} class="btn btn-warning" onclick="apply()">申请服务器</a>
+	&nbsp;&nbsp; | &nbsp;&nbsp;
+        <form id="query_form" role="form" class="form-inline" action="{{ url_for('standby_list') }}" method="GET" style="margin-bottom:0px; display: inline">
+          {%  set form = data['filter_form'] %}
+          {{ btstrp.render_field(form.idc, label_visible=true, value=form['idc']) }}
+          {{ btstrp.render_field(form.cpu, label_visible=true, value=form['cpu']) }}
+          {{ btstrp.render_field(form.ram_size, label_visible=true, value=form['ram_size']) }}
+          &nbsp;&nbsp;&nbsp;<button type="submit" class="btn btn-primary">查询</button>
+          <a class="btn btn-primary" onclick="formReset()">重置</a>
+        </form>
+      </div>
+      <!-- /.panel-heading -->
+      <div class="panel-body">
+        <!-- Tab panes -->
+        <div class="tab-pane fade in active" id="inuse">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="serverlist" style="display:none">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>序列号</th>
+                  <th>IP</th>
+                  <th>操作系统</th>
+                  <th>机房</th>
+                  <th>机架位置</th>
+                  <th>CPU</th>
+                  <th>内存</th>
+                  <th>PCIE卡</th>
+                  <th>详细</th>
+                </tr>
+              </thead>
+              <tbody>
+                {%  if data['page_data']  %}
+                {% set table_data = data['page_data']|sort(attribute='server_id') %}
+                {% for row in table_data %}
+                <tr onclick='change("{{row["server_id"]}}")'>
+		  <td style="text-align:center">
+		    <input type="checkbox" id="{{row["server_id"]}}" onclick='change("{{row["server_id"]}}")'>
+		  </td>
+                  <td>
+                    {% if row["server_id"] %}
+                    <a href="{{ url_for('server_info', server_id=row['server_id']) }}" type="button" class="btn btn-info btn-xs" onclick="stopEventBubble()">
+                      {{ row["server_id"] }}
+                    </a>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["ip"] %}
+		    {{ row["ip"] }}
+                    <!-- <a  type="button" class="btn btn-success btn-xs" onclick="stopEventBubble()"> -->
+                    <!--       {{ row["ip"] }} -->
+                    <!--     </a> -->
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["os_version"] %}
+		    {{ row["os_version"] }}
+                    <!-- <a  type="button" class="btn btn-default btn-xs"> -->
+                    <!--     {{ row["os_version"] }} -->
+                    <!-- </a> -->
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["idc"] %}
+                    {{ row["idc"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["rack_location"] %}
+                    {{ row['rack_location'] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["cpu"] %}
+                    {{ row['cpu'] }}核
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["ram_size"] %}
+                    {{ row["ram_size"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["pcie_card"] %}
+                    {{ row['pcie_card'] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a href="{{ url_for('server_info', server_id=row['server_id']) }}" type="button" class="btn btn-primary btn-xs" onclick="stopEventBubble()">
+                      Detail
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+{% endblock %}
+{% block script %}
+{{ super() }}
+<script>
+  $(document).ready(function() {
+  $('#serverlist').dataTable({
+  "aaSorting": [ 2, "asc" ],
+  "bPaginate": false,
+  'oLanguage': {
+  'sLengthMenu': '每页显示 _MENU_ 条记录',
+  'sSearch': '查询：',
+  'sInfo': '从 _START_ 到 _END_ / 共 _TOTAL_ 条记录',
+  'oPaginate': {
+  'sFirst': '首页',
+  'sPrevious': '上一页',
+  'sNext': '下一页',
+  'sLast': '尾页'
+  },
+  },
+  'columns': [
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":true, "searchable":true},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false, "searchable":true},
+  {"orderable":true},
+  {"orderable":true},
+  {"orderable":false},
+  {"orderable":false}
+  ]
+  });
+  $('#serverlist').show();
+  });
+</script>
+{% endblock %}

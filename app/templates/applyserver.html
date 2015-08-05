@@ -1,0 +1,179 @@
+{% extends "frame.html" %}
+{% import "bootstrap_form.html" as btstrp %}
+{% set level1_name='cmdb' %}
+{% set level2_name='standby_list' %}
+{% block page_wrapper %}
+
+<script>
+
+  function change_product(){
+  bu_name = $('#bu')[0].value;
+  var url = "get_product/"+bu_name
+  var xmlHttp=new XMLHttpRequest();
+  xmlHttp.open( "GET",url, false );
+  xmlHttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+  xmlHttp.send()
+  product_list = xmlHttp.responseText
+  product_list = JSON.parse(product_list)
+  product = $('#product')[0]
+  product.length = 0;
+  for(i=0;i<product_list.length;i++)
+	      product.add(new Option(product_list[i],product_list[i]));
+	      }
+
+	      function check_input(my_data)
+	      {
+	      if (my_data.bu.value == "")
+	      {
+	      alert("请业务线");
+	      my_data.bu.focus();
+	      return false;
+	      }
+	      if (my_data.type.value == "")
+	      {
+	      alert("请选择子业务");
+	      my_data.type.focus();
+	      return false;
+	      }
+	      }
+
+	      </script>
+
+<!-- this is the main content section to be overwritten -->
+<div class="row">
+
+  <div class="col-lg-4">
+    <div class="panel panel-default"> 
+      <div class="panel-heading">
+	填写申请信息：
+      </div> 
+      <div class="panel-body">
+	<div class="col-lg-12">
+	  <form role="form" action="applyresult" method="POST" onsubmit="return check_input(this)">
+	    <div class="row">
+	      {%  set form = data['form'] %}
+	      <div class="form-group" onchange="change_product()">
+                {{ btstrp.render_field(form.bu) }}
+              </div>
+              <div class="form-group">
+                {{ btstrp.render_field(form.product) }}
+              </div>
+              <div class="form-group">
+                {{ btstrp.render_field(form.type) }}
+              </div>
+              <div class="form-group">
+                {{ btstrp.render_field(form.dba_owner) }}
+              </div>
+              <div class="form-group">
+                {{ btstrp.render_field(form.ip) }}
+              </div>
+              <input hidden="hidden" value="{{ data['comment'] }}" name="comment" id="comment" />
+	    </div>
+	    <div class="row">
+	      <button type="submit" class="btn btn-success">提交</button>
+	      <a href="{{ url_for('standby_list') }}" type="button" class="btn btn-default">取消</a>
+	    </div>
+	  </form>
+	</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <!-- Nav tabs -->
+
+        <b>确认您选择的服务器：</b>
+      </div>
+      <!-- /.panel-heading -->
+      <div class="panel-body">
+        <!-- Tab panes -->
+        <div class="tab-pane fade in active" id="inuse">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="serverlist">
+              <thead>
+                <tr>
+                  <th>IP</th>
+                  <th>操作系统</th>
+                  <th>机房</th>
+                  <th>机架位置</th>
+                  <th>CPU</th>
+                  <th>内存</th>
+                </tr>
+              </thead>
+              <tbody>
+                {%  if data['page_data']  %}
+                {% set table_data = data['page_data']|sort(attribute='server_id') %}
+                {% for row in table_data %}
+                <tr>
+                  <td>
+                    {% if row["ip"] %}
+                    <a href="{{ url_for('server_info', server_id = row['server_id']) }}" type="button" class="btn btn-info btn-xs">
+                      {{ row["ip"] }}
+		    </a>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["os_version"] %}
+                    {{ row["os_version"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["idc"] %}
+                    {{ row["idc"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["rack_location"] %}
+                    {{ row['rack_location'] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["cpu"] %}
+                    {{ row['cpu'] }}核
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["ram_size"] %}
+                    {{ row["ram_size"] }}
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+{% endblock %}
+{% block script %}
+{{ super() }}
+<script>
+  $(document).ready(function() {
+  $('#serverlist').dataTable({
+  "bSort": false,
+  "bFilter": false, 
+  "bPaginate": true,
+  "iDisplayLength":10,
+  "bLengthChange":false,
+  'oLanguage': {
+  'sSearch': '搜索：',
+  'sInfo': '从 _START_ 到 _END_ / 共 _TOTAL_ 条记录',
+  'oPaginate': {
+  'sFirst': '首页',
+  'sPrevious': '前一页',
+  'sNext': '后一页',
+  'sLast': '尾页'
+  },
+  }
+  });
+  });
+</script>
+{% endblock %}

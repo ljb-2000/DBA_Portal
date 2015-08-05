@@ -1,0 +1,173 @@
+{% extends 'frame.html' %}
+{%  set level1_name='cmdb' %}
+{%  set level2_name='cluster_list' %}
+{% block page_wrapper %}
+
+<script>
+
+</script>
+
+
+<!-- cluster detail-->
+<div class="row">
+  <div class="col-lg-12">
+    <div class="panel panel-info">
+    </div>
+    <b>备份详细信息</b>
+    <ul class="nav nav-tabs" id="myTab">
+      <li class="active"><a href="#MHA">MHA</a></li>
+      <!-- <li ><a href="#MMM">MMM</a></li> -->
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane active" id="MHA">
+        <b> MHA集群总览</b>
+	<table class="table table-bordered table-hover" id="mh">
+	  <thead>
+	    <tr><th>集群名</th><th>实体IP</th><th>版本</th><th>虚拟IP</th><th>端口</th><th>管理节点</th><th>角色</th><th>状态</th></tr>
+          </thead>
+	  <tbody>
+	    {%  if data['mha']  %}
+	    {% set tables = data['mha'] %}
+            {% set colors = ['','']%}
+            {% for buss in tables | sort %}
+            {% set color = colors[loop.index%2] %}
+            {% for table_data in tables[buss] %}
+	    <tr style="background: {{ color }}">
+              {% if loop.index== 1 %}
+              {% set rowspan = tables[buss]|count  %}
+              <td rowspan = {{ rowspan }}>
+                {{ table_data["buss"] }}
+              </td>
+              {% endif %}
+	      <td>
+                {% if table_data['RIP'] %}
+		{{ table_data['RIP'] }}
+                {% endif %}
+	      </td>
+              <td>
+                {% if table_data["version"] %}
+                {{ table_data["version"] }}
+                {% endif %}
+              </td>
+              <td>
+                {% if table_data["VIP"] %}
+		{{ table_data["VIP"] }}
+                {% endif %}
+	      </td>
+              <td>
+                {% if table_data["port"] %}
+		{{ table_data["port"] }}
+                {% endif %}
+	      </td>
+	      <td>
+                {% if table_data["MonIP"] %}
+                {{ table_data["MonIP"] }}
+                {% endif %}
+              </td>
+	      {% if table_data["Role"] and table_data["Role"] == 'PPE' %}
+	      <td style="color:red"><b>{{ table_data["Role"] }}</b></td>
+              {% else %}
+	      <td>{{ table_data["Role"] }}</td>
+	      {% endif %}
+              <td>
+                {% if table_data["Status"] %}
+                {{ table_data["Status"] }}
+                {% endif %}
+              </td>
+	    </tr>
+            {% endfor %}
+            {% endfor %}
+	    {% endif %}
+	  </tbody>
+	</table>
+      </div>
+
+      <div class="tab-pane" id="MMM">
+        <b> MMM集群总览</b>
+        <table class="table table-bordered table-hover" id="mm">
+          <thead>
+            <tr>
+              <th>集群名</th>
+              <th>实体IP</th>
+              <th>版本</th>
+              <th>虚拟IP</th>
+              <th>管理节点</th>
+              <th>角色</th>
+              <th>读写角色</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            {%  if data['mmm']  %}
+            {% set tables = data['mmm'] %}
+            {% set colors = ['','']%}
+            {% for buss in tables | sort %}
+            {% set color = colors[loop.index%2] %}
+            {% for table_data in tables[buss] %}
+            <tr style="background: {{ color }}">
+              {% if loop.index== 1 %}
+              {% set rowspan = tables[buss]|count  %}
+              <td rowspan = {{ rowspan }}>
+                {{ table_data["buss"] }}
+              </td>
+              {% endif %}
+              <td>
+                {% if table_data["RIP"] %}
+                {{ table_data["RIP"] }}
+                {% endif %}
+              </td>
+              <td>
+                {% if table_data["version"] %}
+                {{ table_data["version"] }}
+                {% endif %}
+              </td>
+              <td>
+                {% if table_data["VIP"] %}
+                {{ table_data["VIP"] }}
+                {% endif %}
+              </td>
+              <td>
+                {% if table_data['MonIP'] %}
+                {{ table_data['MonIP'] }}
+                {% endif %}
+              </td>
+              <td>
+                {% if table_data['Role'] %}
+                {{ table_data['Role'] }}
+                {% endif %}
+              </td>
+              <td>
+                {% if table_data['MSStatus'] %}
+                {{ table_data['MSStatus'] }}
+                {% endif %}
+              </td>
+              <td>
+                {% if table_data['Status'] %}
+                {{ table_data['Status'] }}
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+            {% endif%}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+{% block script %}
+{{ super() }}
+<script>
+  $(function () {
+  $('#myTab a:first').tab('show');//初始化显示哪个tab
+
+  $('#myTab a').click(function (e) {
+  $(this).tab('show');//显示当前选中的链接及关联的content
+  })
+  })
+</script>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "frame.html" %}
+{% import "bootstrap_form.html" as btstrp %}
+{% set level1_name='cmdb' %}
+{% set level2_name='my_workflow' %}
+{% block page_wrapper %}
+
+<!-- my instance workflow -->
+<div class="row"  id="instance_status">
+  <!-- <div class="tab-content"> -->
+  <!--   <\!-- Tab panes -\-> -->
+  <!--   <ul class="nav nav-tabs" id="myTab"> -->
+  <!--     <li class="active" ><a href="#instance_status">实例部署</a></li> -->
+  <!--   </ul> -->
+  <!-- </div> -->
+
+  <div class="col-lg-12">
+    <table class="table table-bordered table-hover">
+      <thead>
+	<tr><th>流程号</th><th>流程类型</th><th>IP</th><th>端口</th><th>数据库版本</th><th>BU</th><th>部署时间</th><th>状态更新时间</th><th>部署状态</th></tr>
+      </thead>
+      <tbody>
+	{% for instance in data["page_data"] %}
+	{% set flow_json_param = instance["flow_json_param"] %}
+	<tr>
+	  <td>
+	    {% if instance["flow_id"] %}
+	    {{ instance["flow_id"] }}
+	    {% endif %}
+	  </td>
+	  <td>
+	    {% if instance["flow_name"] %}
+	    {{ instance["flow_name"] }}
+	    {% endif %}
+	  </td>
+	  <td>
+	    {% if flow_json_param["server_ip"] %}
+	    {{ flow_json_param["server_ip"] }}
+	    {% endif %}
+	  </td>
+	  <td>
+	    {% if flow_json_param["port"] %}
+	    {{ flow_json_param["port"] }}
+	    {% endif %}
+	  </td>
+	  <td>
+	    {% if flow_json_param["version"] %}
+	    {{ flow_json_param["version"] }}
+	    {% endif %}
+	  </td>
+	  <td>
+	    {% if flow_json_param["buss"] %}
+	    {{ flow_json_param["buss"] }}
+	    {% endif %}
+	  </td>
+	  <td>
+	    {% if instance["add_time"] %}
+	    {{ instance["add_time"] }}
+	    {% endif %}
+	  </td>
+	  <td>
+	    {% if instance["last_update_time"] %}
+	    {{ instance["last_update_time"] }}
+	    {% endif %}
+	  </td>
+	  {% if instance["flow_status"] == "执行失败" %}
+	  {% set color_style="color:red" %}
+	  {% elif instance["flow_status"] == "执行成功" %}
+	  {% set color_style="color:green" %}
+	  {% else %}
+	  {% set color_style="color:blue" %}
+	  {% endif %}
+	  <td style="{{ color_style }}">
+	    {% if instance["flow_status"] %}
+	    {{ instance["flow_status"] }}
+	    {% endif %}
+	  </td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+{% endblock %}
+{% block script %}
+{{ super() }}
+<script>
+  $(document).ready(function () {
+  $('#mysql').dataTable({
+  "bSort": false,
+  "bFilter": false,
+  "bPaginate": false,
+  "bInfo": false,
+  "iDisplayLength": 10,
+  "bLengthChange": false
+  });
+  $('#mongodb').dataTable({
+  "bSort": false,
+  "bFilter": false,
+  "bPaginate": false,
+  "bInfo": false,
+  "iDisplayLength": 10,
+  "bLengthChange": false
+  });
+  $('#mysql_cluster').dataTable({
+  "bSort": false,
+  "bFilter": false,
+  "bPaginate": false,
+  "bInfo": false,
+  "iDisplayLength": 10,
+  "bLengthChange": false
+  });
+  $('#backup_report_summary').show();
+  $('#backup_report_detail').show();
+  });
+  $(function () {
+  $('#myTab a:first').tab('show');//初始化显示哪个tab
+
+  $('#myTab a').click(function (e) {
+  $(this).tab('show');//显示当前选中的链接及关联的content
+  })
+  })
+  $('#myModal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var ip = button.data('ip')
+  var port = button.data('port')
+  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+  var modal = $(this)
+  modal.find('.modal-body #ip').val(ip)
+  modal.find('.modal-body #show_ip').val(ip)
+  modal.find('.modal-body #port').val(port)
+  modal.find('.modal-body #show_port').val(port)
+  modal.find('.modal-body #time').val('')
+  $('#submit').attr("disabled", "disabled");
+  $('#warning')[0].innerHTML = ''
+  })
+  function check(ntime) {
+  var result = ntime.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2})\:(\d{2})\:(\d{2})$/);
+  if (result == null) {
+  return false;
+  } else
+  return true
+
+  }
+  $('#time').on('change', function () {
+  if (check(this.value)) {
+  $('#submit').removeAttr('disabled');
+  $('#warning')[0].innerHTML = ''
+  }
+  else {
+  $('#warning')[0].innerHTML = '日期格式错误';
+  $('#submit').attr("disabled", "disabled");
+  }
+  }
+  )
+</script>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends "frame.html" %}
+{% import "bootstrap_form.html" as btstrp %}
+{% set level1_name='cmdb' %}
+{% set level2_name='instance_list' %}
+{% block page_wrapper %}
+
+<script>
+
+function stopEventBubble(event){
+    var e=event || window.event;
+    if (e && e.stopPropagation){
+	e.stopPropagation();    
+    } else {
+	e.cancelBubble=true;
+    }
+}
+
+function formReset() {
+    $("#query_form").find("select, input, checkbox").val("");
+}
+</script>
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="panel panel-info">
+      <div class="panel-heading">
+	{% if data['user_priv'] != 1 %}
+	{% set disabled = "disabled='disabled'" %}
+	{% else %}
+	{% set disabled = "" %}
+	{% endif %}
+
+        <!-- Nav tabs -->
+        <form id="query_form" role="form" class="form-inline" action="{{ url_for('instance_list') }}" method="GET">
+          {%  set filter_form = data['filter_form'] %}
+          {{ btstrp.render_field(filter_form.cluster_name, label_visible=true, value=filter_form['cluster_name']) }}
+          {{ btstrp.render_field(filter_form.dba_owner, label_visible=true, value=filter_form['dba_owner']) }}
+          {{ btstrp.render_field(filter_form.type, label_visible=true, value=filter_form['type']) }}
+          {{ btstrp.render_field(filter_form.status, label_visible=true, value=filter_form['status']) }}
+          <button type="submit" class="btn btn-primary">查询</button>
+          <a class="btn btn-primary" onclick="formReset()">重置</a>
+        </form>
+      </div>
+      <!-- /.panel-heading -->
+      <div class="panel-body">
+        <!-- Tab panes -->
+        <div class="tab-pane fade in active" id="inuse">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="instlist" style="display:none">
+              <thead>
+                <tr><th>集群名</th><th>IP</th><th>端口</th><th>数据库类型</th><th>数据库版本</th><th>部门</th><th>负责人</th><th>状态</th><th>操作</th><th hidden="hidden">顺序</th></tr>
+              </thead>
+              <tbody>
+                {%  if data['page_data']  %}
+                {% set table_data = data['page_data']|sort(attribute='server_id') %}
+                {% for row in table_data %}
+                <tr>
+                  <td>
+                    {% if row["cluster_name"] %}
+		    {{ row['cluster_name'] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["server_ip"] %}
+                    <a href="{{ url_for('server_info', server_id=row['server_id']) }}" type="button" class="btn btn-info btn-xs">
+                      {{ row["server_ip"] }}
+                    </a>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["port"] %}
+                    {{ row["port"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["type"] %}
+                    {{ row['type'] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["version"] %}
+                    {{ row['version'] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["buss"] %}
+                    {{ row["buss"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["dba_owner"] %}
+                    {{ row["dba_owner"] }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row["status"] and row["status"]=="在线" %}
+                    {{ row["status"] }}
+                  <td>
+                    <a href="{{ url_for('operate_instance', operate_type='pre_offline',id=row['id'],ip=row['server_ip'], port=row['port']) }}" type="button" {{disabled}} onclick="return confirm('确认预下线？')" class="btn btn-danger btn-xs">预下线
+                    </a>
+                  </td>
+                  {% elif row["status"]=="下线" %}
+                  {{ row["status"] }}
+                  <td>
+                    <div class="btn-group">
+                      <button type="button" {{disabled}} class="btn btn-default btn-xs btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        操作 <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu" role="menu">
+                        {% if row["recently_time"] %}
+			<a href="{{ url_for('operate_instance', operate_type='offline',id=row['id'],ip=row['server_ip'],port=row['port'],force=row['recently_time']) }}" type="button" onclick="return confirm('预下线时间不足三天，是否强制下线？')" class="btn btn-danger btn-xs">强制下线</a>
+                        {% else %}
+			<a href="{{ url_for('operate_instance', operate_type='offline',id=row['id'],ip=row['server_ip'],port=row['port'],force=row['recently_time']) }}" type="button" onclick="return confirm('确认正式下线？')" class="btn btn-danger btn-xs">正式下线</a>
+			{% endif %}
+                        <a href="{{ url_for('operate_instance', operate_type='online',id=row['id'],ip=row['server_ip'],port=row['port']) }}" type="button" onclick="return confirm('确认重新上线？')" class="btn btn-success btn-xs">重新上线
+                      </a></ul>
+                    </div>
+                  </td>
+                  {% elif row["status"]=="已初始化" %}
+                  {{ row["status"] }}
+                  <td>
+                    <a href="{{ url_for('operate_instance', operate_type='online',id=row['id'],ip=row['server_ip'],port=row['port']) }}" type="button" class="btn btn-success btn-xs dropdown-toggle" onclick="return confirm('确认上线？')">
+                      上线
+                    </a>
+                  </td>
+                  {% else %}
+                  {{ row["status"] }}
+                  <td>
+                  </td>
+                  {% endif %}
+                  </td>
+		  <td hidden="hidden">
+                    {% if row["order"] %}
+                    {{ row["order"] }}
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /.col-lg-12 -->
+</div>
+{% endblock %}
+{% block script %}
+{{ super() }}
+<script>
+  $(document).ready(function() {      
+  $('#instlist').dataTable({        
+  "aaSorting": [ 9, "asc" ],
+  "bPaginate": true,
+  'oLanguage': {
+  'sLengthMenu': '每页显示 _MENU_ 条记录',
+  'sSearch': '查询：',
+  'sInfo': '从 _START_ 到 _END_ / 共 _TOTAL_ 条记录',
+  'oPaginate': {
+  'sFirst': '首页',
+  'sPrevious': '上一页',
+  'sNext': '下一页',
+  'sLast': '尾页'
+  },
+  },
+  'columns': [
+  {"orderable":false},
+  {"orderable":true,"searchable":true},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":false},
+  {"orderable":true},
+  {"orderable":false},
+  {"orderable":false}
+  ]
+  });
+
+  $('#instlist').show();
+  });
+
+
+
+</script>
+{% endblock %}
+
