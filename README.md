@@ -1,9 +1,28 @@
-## dba_portoal
+## DBA Portal
 
 ---
 
-portal.dba.dp/
+DBA_Portal is the web manager which help DBAs to operate efficiently.
 
-using frontend template from: http://startbootstrap.com/template-overviews/sb-admin-2/
-using web framework "flask" from : http://flask.pocoo.org/
-using web template from: http://jinja.pocoo.org/docs/dev/
+It includes:
+
+Apply and manage servers.
+
+Install MySQL, MongoDB, Memcahce.
+
+Manage DB instances.
+
+Monitor MHA Cluster.
+
+DB(file) backup and recovery.
+
+---
+
+Following techniques were used in this project,
+
+frontend template from: http://startbootstrap.com/template-overviews/sb-admin-2/
+
+web framework "flask" from : http://flask.pocoo.org/
+
+web template from: http://jinja.pocoo.org/docs/dev/
+
