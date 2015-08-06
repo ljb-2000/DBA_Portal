@@ -27,7 +27,7 @@ sys.setdefaultencoding('utf8')
 
 app = Flask(__name__)
 app.debug = True
-app.config['SECRET_KEY'] = 'cenalulu'
+app.config['SECRET_KEY'] = 'hello_dba'
 app.config['USER_CODE'] = 'Zaq!@#$%^yhgtREWSXcdfvbnhy&*90oiujkl'
 
 
@@ -1062,14 +1062,14 @@ def sort_cluster_by_backup_status(clusters):
     return sorted_cluster
 
 
-@app.route("/backup")
-def backup():
+@app.route("/backup_center")
+def backup_center():
     if not have_accessed():
         return redirect(url_for('login'))
     try:
-        backlist = BackupList()
-        backup_info = backlist.list_all()
-        backup_instance = backlist.backup_report()
+        backup_list = BackupList()
+        backup_info = backup_list.mha()
+        backup_instance = backup_list.backup_report()
 
         if not backup_info.has_key('mmm'):
             backup_info['mmm'] = ''
@@ -1083,7 +1083,7 @@ def backup():
         data['nonbackup']="尚未备份"
         data['warningbackup']="警告备份"
         data['goodbackup']="成功备份"
-        return render_template('backup_info.html', data=data, data_instance=backup_instance)
+        return render_template('backup_center.html', data=data, data_instance=backup_instance)
     except Exception,e:
         flash(e,'danger')
         return render_template('blank.html')
@@ -1270,13 +1270,19 @@ def switch_flag():
         flash(msg, 'danger')
         return render_template('blank.html')
 
-@app.route("/recover")
-def recover():
+@app.route("/recovery_center")
+def recovery_center():
     if not have_accessed():
         return redirect(url_for('login'))
     try:
-        data = dict({'page_name': 'Backup Center'})
-        return render_template('blank.html', data=data)
+        message_list = ({'from': 'admin', 'time': '2013-01-01', 'content': 'This is a test message'},)
+        task_list = ({'name': 'task 1', 'progress': 10},)
+        
+        data = dict({'page_name': 'ToDo Recovery Center'})
+        data['message_list'] = message_list
+        data['task_list'] = task_list
+        data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
+        return render_template('recovery_center.html', data=data)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
@@ -1366,9 +1372,6 @@ def login():
         app.config.setdefault('CAS_AFTER_LOGIN', flask.url_for('dashboard'))
 
         cas_token_session_key = current_app.config['CAS_TOKEN_SESSION_KEY']
-
-        print '#1111111111111111111111#'
-
         redirect_url = create_cas_login_url(
             current_app.config['CAS_SERVER'],
             current_app.config['CAS_LOGIN_ROUTE'],
@@ -1377,24 +1380,15 @@ def login():
         
         if 'ticket' in flask.request.args:
             flask.session[cas_token_session_key] = flask.request.args['ticket']
-
-        print '22#1111111111111111111111#'
         if cas_token_session_key in flask.session:
-            print '221#1111111111111111111111#'
             if validate(flask.session[cas_token_session_key]):
-                print '222#1111111111111111111111#'
                 redirect_url = current_app.config['CAS_AFTER_LOGIN']
-                print '223#1111111111111111111111#'
                 all_servers = ServerList()            
-                print all_servers
                 privilege = all_servers.list_user_privilege(real_name=flask.session['CAS_NAME'],domain_name=flask.session['CAS_USERNAME'])
-                print '224#1111111111111111111111#'
                 flask.session['USER_PRIV'] = privilege
             else:
-                print '223#1111111111111111111111#'
                 del flask.session[cas_token_session_key]
 
-        print '33#1111111111111111111111#'
         current_app.logger.debug('Redirecting to: {0}'.format(redirect_url))
         return flask.redirect(redirect_url)
     except Exception, e:
@@ -1541,4 +1535,4 @@ def dashboard():
 
 if __name__ == "__main__":
     app.jinja_env.cache = None
-    app.run(host='0.0.0.0', port=AppConfig.PORT)
+    app.run(host='0.0.0.0', port=AppConfig.PORTAL_PORT)

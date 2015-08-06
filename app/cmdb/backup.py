@@ -1,7 +1,7 @@
 from cmdb_api_base import CmdbApiBase
 
 class BackupList(CmdbApiBase):
-    def list_all(self):
+    def mha(self):
         result = self.__call_interface__('BACKUP','backup_info',json_obj=None)
         return result
 

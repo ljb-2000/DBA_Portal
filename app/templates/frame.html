@@ -8,14 +8,13 @@ set side_bar_tree = {
 2:{'func_name':'instance_list', 'show_name':'DB实例管理', 'next_level':{}},
 3:{'func_name':'cluster_list', 'show_name':'DB集群管理', 'next_level':{}},
 4:{'func_name':'schema_list', 'show_name':'Schema List', 'next_level':{}}
-}
-},
-2:{ 'func_name':'backup','show_name':'备份管理','icon':'fa-dashboard','next_level':{
-0:{'func_name':'backup_report', 'show_name':'数据库备份日报', 'next_level':{}},
-1:{'func_name':'backup', 'show_name':'备份中心', 'next_level':{}},
-2:{'func_name':'recover', 'show_name':'恢复中心', 'next_level':{}}
 } },
-3:{ 'func_name':'monitor','show_name':'Monitor','icon':'fa-dashboard','next_level':{
+2:{ 'func_name':'backup','show_name':'备份管理','icon':'fa-bar-chart-o','next_level':{
+0:{'func_name':'backup_report', 'show_name':'数据库备份日报', 'next_level':{}},
+1:{'func_name':'backup_center', 'show_name':'备份中心', 'next_level':{}},
+2:{'func_name':'recovery_center', 'show_name':'恢复中心', 'next_level':{}}
+} },
+3:{ 'func_name':'monitor','show_name':'Monitor','icon':'fa-bar-chart-o','next_level':{
 0:{'func_name':'metrics', 'show_name':'Metrics', 'next_level':{}},
 1:{'func_name':'slowlog', 'show_name':'Slow Log', 'next_level':{}},
 2:{'func_name':'query_monitor', 'show_name':'Query Monitor', 'next_level':{}},
