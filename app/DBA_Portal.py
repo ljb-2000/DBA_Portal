@@ -518,7 +518,6 @@ def standby_list():
         flash(e.detail_msg(), 'danger')
         return render_template('blank.html')
     except Exception, e:
-	#raise e
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
         return render_template('blank.html')
@@ -583,7 +582,6 @@ def server_list():
         flash(e.detail_msg(), 'danger')
         return render_template('blank.html')
     except Exception, e:
-	#raise e
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
         return render_template('blank.html')
@@ -1276,13 +1274,13 @@ def switch_flag():
 def recover():
     if not have_accessed():
         return redirect(url_for('login'))
-
     try:
         data = dict({'page_name': 'Backup Center'})
         return render_template('blank.html', data=data)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
+        return render_template('blank.html')
 
 @app.route("/metrics")
 def metrics():
@@ -1294,6 +1292,7 @@ def metrics():
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
+        return render_template('blank.html')
 
 @app.route("/slowlog")
 def slowlog():
@@ -1305,6 +1304,7 @@ def slowlog():
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
+        return render_template('blank.html')
 
 @app.route("/querymonitor")
 def query_monitor():
@@ -1316,6 +1316,7 @@ def query_monitor():
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
+        return render_template('blank.html')
 
 @app.route("/blank")
 def blank():
@@ -1325,6 +1326,7 @@ def blank():
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
+        return render_template('blank.html')
 
 @app.route("/")
 def index():
@@ -1333,6 +1335,7 @@ def index():
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
+        return render_template('blank.html')
 
 
 ###################################
@@ -1364,6 +1367,8 @@ def login():
 
         cas_token_session_key = current_app.config['CAS_TOKEN_SESSION_KEY']
 
+        print '#1111111111111111111111#'
+
         redirect_url = create_cas_login_url(
             current_app.config['CAS_SERVER'],
             current_app.config['CAS_LOGIN_ROUTE'],
@@ -1373,20 +1378,30 @@ def login():
         if 'ticket' in flask.request.args:
             flask.session[cas_token_session_key] = flask.request.args['ticket']
 
+        print '22#1111111111111111111111#'
         if cas_token_session_key in flask.session:
+            print '221#1111111111111111111111#'
             if validate(flask.session[cas_token_session_key]):
+                print '222#1111111111111111111111#'
                 redirect_url = current_app.config['CAS_AFTER_LOGIN']
+                print '223#1111111111111111111111#'
                 all_servers = ServerList()            
+                print all_servers
                 privilege = all_servers.list_user_privilege(real_name=flask.session['CAS_NAME'],domain_name=flask.session['CAS_USERNAME'])
+                print '224#1111111111111111111111#'
                 flask.session['USER_PRIV'] = privilege
             else:
+                print '223#1111111111111111111111#'
                 del flask.session[cas_token_session_key]
 
+        print '33#1111111111111111111111#'
         current_app.logger.debug('Redirecting to: {0}'.format(redirect_url))
         return flask.redirect(redirect_url)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
+        return render_template('blank.html')
+
 
 @app.route('/logout')
 def logout():
@@ -1409,6 +1424,7 @@ def logout():
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
+        return render_template('blank.html')
 
 def validate(ticket):
     """
@@ -1526,4 +1542,3 @@ def dashboard():
 if __name__ == "__main__":
     app.jinja_env.cache = None
     app.run(host='0.0.0.0', port=AppConfig.PORT)
-

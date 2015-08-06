@@ -8,7 +8,7 @@ It includes:
 
 Apply and manage servers.
 
-Install MySQL, MongoDB, Memcahce.
+Install MySQL, MongoDB, Memcache.
 
 Manage DB instances.
 

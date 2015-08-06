@@ -29,7 +29,6 @@ class CmdbApiBase:
 
     def __call_interface__(self, module_name, interface_name, json_obj=None,timeout=10):
         """
-
         :rtype : dict
         """
         try:
@@ -38,7 +37,6 @@ class CmdbApiBase:
             else:
                 query_obj = {"data": "{}"}
             fp = requests.get(self.__api_addr + module_name + '/' + interface_name, params=query_obj, timeout=timeout)
-            #fp = requests.get(self.__api_addr + module_name + '/' + interface_name, params=query_obj, timeout=1)
             if fp.status_code == requests.codes.ok:
                 result = fp.json()
                 if not result:
@@ -47,12 +45,11 @@ class CmdbApiBase:
                 if result['status'] == 0:
                     return result['data']
                 else:
-                    raise CmdbApiCallException(error_no=result['status'], msg=result['data'],
-                                               module=module_name, interface=interface_name, param=json.dumps(json_obj))
+                    raise CmdbApiCallException(error_no=result['status'], msg=result['data'],module=module_name, interface=interface_name, param=json.dumps(json_obj))
+                                               
             else:
                 fp.raise_for_status()
         except Exception, e:
-            raise e
-            #raise CmdbApiCallException(error_no=e.errno, msg=e.args[0],
-                                       # module=module_name, interface=interface_name, param=e.args[0])
-
+            msg = "%s: %s" % (type(e).__name__, e.message)
+            raise Exception('调用CMDB服务失败...')
+            
