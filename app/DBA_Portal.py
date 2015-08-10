@@ -252,7 +252,9 @@ def fill_install_db_form(server_form=None, db_type=None, instance=None, comment=
         ports = [27017,27018,27019,27117,27118,27119]
     elif db_type == 'memcache':
         version_list = host_info.list_supported_memcache_version()
-        ports = [11211]
+        ports = []
+        for port in range(11211,11220):
+            ports.append(port)
 
     for i in instance:
 	if i["port"] in ports and i['status'] != u'未初始化':
@@ -1270,23 +1272,26 @@ def switch_flag():
         flash(msg, 'danger')
         return render_template('blank.html')
 
-@app.route("/recovery_center")
-def recovery_center():
+
+
+@app.route("/migration_center")
+def migration_center():
     if not have_accessed():
         return redirect(url_for('login'))
     try:
-        message_list = ({'from': 'admin', 'time': '2013-01-01', 'content': 'This is a test message'},)
+        message_list = ({'from': 'admin', 'time': '2015-08-07', 'content': 'MySQL Recovery And Migration Tool Center '},)
         task_list = ({'name': 'task 1', 'progress': 10},)
         
-        data = dict({'page_name': 'ToDo Recovery Center'})
+        data = dict({'page_name': 'MySQL Migration Center'})
         data['message_list'] = message_list
         data['task_list'] = task_list
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
-        return render_template('recovery_center.html', data=data)
+        return render_template('migration_center.html', data=data)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
         return render_template('blank.html')
+
 
 @app.route("/metrics")
 def metrics():

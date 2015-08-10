@@ -1,0 +1,91 @@
+{% extends 'frame.html' %}
+{%  set level1_name='backup' %}
+{%  set level2_name='migration_center' %}
+
+{% block page_wrapper %}
+<form class="form-inline">
+<table class="table" >
+    <tr>
+    <td style="width:35%">
+    <label for="SIP" >Source IP:Port</label>
+    <input type="text" class="form-control" id="sourceip" placeholder="源IP:源端口">
+    </td>
+   <td style="width:65%" >
+    <label for="DIP" style="color:red">Destination IP:Port</p></label>
+    <input type="email" class="form-control" id="destinationip" placeholder="目标IP:目标端口">
+   </td>
+</tr>
+<tr>
+    <td colspan="2">
+    <label for="Schema" >Schema Name</label>
+    <input size="30" type="text" class="form-control" id="sourceip" placeholder="数据库名称">
+    </td>
+</tr>
+</table>
+<button type="submit" class="btn btn-primary">数据源添加</button>
+</form>
+
+
+<table class="table table-hover">
+<tr>
+   <th>schema</th>
+   <th>源ip</th> 
+   <th>源端口</th>
+   <th>目标ip</th>
+   <th>目标端口</th>
+   <th>进度</th>
+   <th>Lock</th>
+   <th>切换ip</th>
+</tr>
+<tr class="active">
+<td>test</td>
+<td>127.0.0.1</td>
+<td>3306</td>
+<td>127.0.0.1</td>
+<td>3306</td>
+<td>scp</td>
+<td><button type="button" class="btn btn-warning btn-sm" disabled>scp</button></td>
+<td><button type="button" class="btn btn-danger  btn-sm" disabled>Danger</button></td>
+</tr>
+<tr class="success">
+<td>test</td>
+<td>127.0.0.1</td>
+<td>3306</td>
+<td>127.0.0.1</td>
+<td>3306</td>
+<td>scp</td>
+<td><button type="button" class="btn btn-warning btn-sm" disabled>scp</button></td>
+<td><button type="button" class="btn btn-danger  btn-sm" disabled>Danger</button></td>
+</tr>
+<tr class="warning">
+<td>test</td>
+<td>127.0.0.1</td>
+<td>3306</td>
+<td>127.0.0.1</td>
+<td>3306</td>
+<td>scp</td>
+<td><button type="button" class="btn btn-warning btn-sm" disabled>scp</button></td>
+<td><button type="button" class="btn btn-danger  btn-sm" disabled>Danger</button></td>
+</tr>
+<tr class="danger">
+<td>test</td>
+<td>127.0.0.1</td>
+<td>3306</td>
+<td>127.0.0.1</td>
+<td>3306</td>
+<td>scp</td>
+<td><button type="button" class="btn btn-warning btn-sm" disabled>scp</button></td>
+<td><button type="button" class="btn btn-danger  btn-sm" disabled>Danger</button></td>
+</tr>
+<tr class="info">
+<td>test</td>
+<td>127.0.0.1</td>
+<td>3306</td>
+<td>127.0.0.1</td>
+<td>3306</td>
+<td>scp</td>
+<td><button type="button" class="btn btn-warning btn-sm" disabled>scp</button></td>
+<td><button type="button" class="btn btn-danger  btn-sm" disabled>Danger</button></td>
+</tr>
+</table>
+{% endblock %}

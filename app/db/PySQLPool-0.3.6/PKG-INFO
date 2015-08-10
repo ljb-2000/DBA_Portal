@@ -1,0 +1,16 @@
+Metadata-Version: 1.0
+Name: PySQLPool
+Version: 0.3.6
+Summary: Python MySQL Connection Pooling and MySQL Query management
+Home-page: http://code.google.com/p/pysqlpool/
+Author: Nick Verbeck
+Author-email: nerdynick@gmail.com
+License: UNKNOWN
+Download-URL: http://code.google.com/p/pysqlpool/downloads/list
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Database
+Classifier: Programming Language :: Python
+Classifier: Operating System :: OS Independent
+Classifier: Development Status :: 5 - Production/Stable
