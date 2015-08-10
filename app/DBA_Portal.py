@@ -253,7 +253,7 @@ def fill_install_db_form(server_form=None, db_type=None, instance=None, comment=
     elif db_type == 'memcache':
         version_list = host_info.list_supported_memcache_version()
         ports = []
-        for port in range(11211,11220):
+        for port in range(11211,11221):
             ports.append(port)
 
     for i in instance:
