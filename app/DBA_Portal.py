@@ -1063,6 +1063,36 @@ def sort_cluster_by_backup_status(clusters):
     sorted_cluster['goodbackup'] = goodbackup
     return sorted_cluster
 
+def get_file_backup_info(st_date, en_date):
+    if not en_date:
+        return None 
+
+    result = {
+        'total': 0,
+        'success': 0,
+        'failed': 0,
+        'noback': 0,
+        'data_size': 0,
+        'disk_use': 0,
+        'bak_server': '',
+        'info': {}
+    }
+    need_backup = current_app.config['FILE_BACK']
+    need_backup = list(need_backup)
+    result['total'] = len(need_backup)
+    with engine.begin() as connection:
+        sql = "SELECT name,file_name,file_size,bak_keep_host FROM DbBak.file_backup " \
+              "WHERE TIME >= DATE(now()) - INTERVAL 1 DAY AND TIME < DATE(now()) order by name"
+        exe_result = row2dict_all(connection.execute(sql).fetchall())
+    for re in exe_result:
+        if re['name'] in need_backup:
+            result['success'] += 1
+            need_backup.remove(re['name'])
+        result['data_size'] += re['file_size']
+    result['failed'] = len(need_backup)
+    result['info'] = exe_result
+    return result
+
 
 @app.route("/backup_center")
 def backup_center():
