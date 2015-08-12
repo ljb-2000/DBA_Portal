@@ -3,11 +3,19 @@
 
 import json
 import backup_config
-
+import time
 import sys
 sys.path.append("..")
 from config import AppConfig
 from db_connect.MySQL_lightweight import MySQL_lightweight
+
+def is_valid_date(str_in):
+    '''Test if it is a valid string of date.'''
+    try:
+        time.strptime(str_in, "%Y-%m-%d")
+        return True
+    except:
+        return False
 
 class FileBackup(object):
     _file_backup_db = 'DbBak'
@@ -22,14 +30,20 @@ class FileBackup(object):
                     'charset':'utf8'}
         self._db = MySQL_lightweight(dbconfig)
 
-    def yesterday_file_backup(self):
-        sql = "SELECT name,file_name,file_size,bak_keep_host FROM file_backup WHERE TIME >= DATE(now()) - INTERVAL 1 DAY AND TIME < DATE(now()) order by name"
+    def get_file_backup_info(self, st_date=time.strftime("%Y-%m-%d",time.localtime(time.time()-24*60*60)), 
+                             en_date=time.strftime('%Y-%m-%d',time.localtime(time.time()))):
+        if not (is_valid_date(st_date) and is_valid_date(en_date)):
+            raise Exception('It is not a valid date.')
+            return False
+        sql = "SELECT name,file_name,file_size,bak_keep_host FROM file_backup WHERE TIME >= '%s' AND TIME < '%s' order by name" % (st_date, en_date)
+        print sql
         self._db.query(sql);
         result = self._db.fetchAllRows();
+        print result
         return result
 
 if __name__ == '__main__':
     test = FileBackup()
-    result = test.yesterday_file_backup()
+    result = test.get_file_backup_info()
     print result
 

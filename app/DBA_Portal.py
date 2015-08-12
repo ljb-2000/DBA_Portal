@@ -1063,7 +1063,8 @@ def sort_cluster_by_backup_status(clusters):
     sorted_cluster['goodbackup'] = goodbackup
     return sorted_cluster
 
-def get_file_backup_info(st_date, en_date):
+def get_file_backup_info(st_date=time.strftime("%Y-%m-%d",time.localtime(time.time()-24*60*60)),
+                         en_date=time.strftime('%Y-%m-%d',time.localtime(time.time()))):
     if not en_date:
         return None 
 
@@ -1080,10 +1081,8 @@ def get_file_backup_info(st_date, en_date):
     need_backup = current_app.config['FILE_BACK']
     need_backup = list(need_backup)
     result['total'] = len(need_backup)
-    with engine.begin() as connection:
-        sql = "SELECT name,file_name,file_size,bak_keep_host FROM DbBak.file_backup " \
-              "WHERE TIME >= DATE(now()) - INTERVAL 1 DAY AND TIME < DATE(now()) order by name"
-        exe_result = row2dict_all(connection.execute(sql).fetchall())
+    file_backup_list = FileBackup()
+    exe_result = file_backup_list.get_file_backup_info()
     for re in exe_result:
         if re['name'] in need_backup:
             result['success'] += 1
@@ -1178,6 +1177,7 @@ def backup_report():
         backlist = BackupList()
 
         result = backlist.email_backup_report()
+        result['File_Backup'] = get_file_backup_info(st_date, en_date)
         result = email_backup_format(result,'backup_report')
         
         result['page_name'] = '数据库备份日报'
