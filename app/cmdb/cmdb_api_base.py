@@ -50,6 +50,7 @@ class CmdbApiBase:
             else:
                 fp.raise_for_status()
         except Exception, e:
-            msg = "%s: %s" % (type(e).__name__, e.message)
-            raise Exception('Fail to call CMDB service...')
+            msg = "Fail to call CMDB service. %s: %s" % (type(e).__name__, e.message)
+            raise Exception(msg)
+        #raise Exception('Fail to call CMDB service...')
             
