@@ -88,7 +88,7 @@ if __name__ == '__main__':
     #     if flag == 0:
     #         content_need += ('\n' + line)
 
-    if not ('Connection aborted' not in content and '10.1.1.193' in content and 'read timeout' in content):
+    if not ('Connection aborted' not in content and '10.1.1.193' in content and 'read timeout' in content and u'失败' in content):
         sendTo = AppConfig.SEND_TO
         sendmail_data = {'sendTo':sendTo, 'subject':'数据库备份日报', 'message':''}
         sendmail_data['message'] = content

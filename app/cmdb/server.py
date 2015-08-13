@@ -13,7 +13,7 @@ class ServerList(CmdbApiBase):
             data['count'] = 1000
         else:
             data = {'count':1000}
-        result = requests.get('http://api.cmdb.dp/api/v0.1/products/DBA/devices',data=data,timeout=6).json()
+        result = requests.get('http://api.cmdb.dp/api/v0.1/products/DBA/devices',data=data,timeout=20).json()
         if 'sn' in data and len(result['devices']) ==0:
             data['server_sn'] = data.pop('sn')
             #result = requests.get('http://api.cmdb.dp/api/v0.1/products/DBA/devices',data=data,timeout=3).json()

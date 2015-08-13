@@ -1,8 +1,11 @@
 # coding: utf8
 import requests,json,flask
 import sys,time,re,datetime
+import bs4
 
 from flask import Flask,render_template,request,url_for,redirect,flash,current_app
+from datetime import timedelta
+
 from cmdb.server import ServerList
 from cmdb.instance import InstList
 from cmdb.server_info_form import ServerInfoForm, ServerInitForm, InstanceInfoForm, StandbyServerInfoForm, ApplyServerForm, InstallDbForm, BackupForm
@@ -14,8 +17,8 @@ from cmdb.cluster import Cluster
 from cas_urls import create_cas_login_url
 from cas_urls import create_cas_logout_url
 from cas_urls import create_cas_validate_url
-from datetime import timedelta
-import bs4
+
+from backup.backup import FileBackup
 
 try:
     from urllib import urlopen
@@ -156,9 +159,11 @@ def byte2humanread(byte):
     ### byte2humanread(1048576)
     ### return '1M'
     """
-    if byte is None or type(byte) is not int:
-        print 'please pass a int into function!'
-        return 0
+    try:
+        byte = int(byte)
+    except:
+        raise Exception('please pass a int into function!')
+
     suffix_array = ['B','KB','MB','GB','TB','PB']
     i = 0
     byte = float(byte)
@@ -1063,35 +1068,6 @@ def sort_cluster_by_backup_status(clusters):
     sorted_cluster['goodbackup'] = goodbackup
     return sorted_cluster
 
-def get_file_backup_info(st_date=time.strftime("%Y-%m-%d",time.localtime(time.time()-24*60*60)),
-                         en_date=time.strftime('%Y-%m-%d',time.localtime(time.time()))):
-    if not en_date:
-        return None 
-
-    result = {
-        'total': 0,
-        'success': 0,
-        'failed': 0,
-        'noback': 0,
-        'data_size': 0,
-        'disk_use': 0,
-        'bak_server': '',
-        'info': {}
-    }
-    need_backup = current_app.config['FILE_BACK']
-    need_backup = list(need_backup)
-    result['total'] = len(need_backup)
-    file_backup_list = FileBackup()
-    exe_result = file_backup_list.get_file_backup_info()
-    for re in exe_result:
-        if re['name'] in need_backup:
-            result['success'] += 1
-            need_backup.remove(re['name'])
-        result['data_size'] += re['file_size']
-    result['failed'] = len(need_backup)
-    result['info'] = exe_result
-    return result
-
 
 @app.route("/backup_center")
 def backup_center():
@@ -1151,6 +1127,8 @@ def email_backup_format(result, which_page):
                 info_sorted[cluster_type].append(tmp)
 
 #backup important files
+    print type(result['File_Backup']['data_size'])
+    print '#----------test int ---------------#'
     result['File_Backup']['data_size'] = byte2humanread(result['File_Backup']['data_size'])
     file_backup = result['File_Backup']['info']
     for f_backup in file_backup:
@@ -1175,9 +1153,9 @@ def backup_report():
     try:
         active = request.values.get('active','MySQL')
         backlist = BackupList()
-
         result = backlist.email_backup_report()
-        result['File_Backup'] = get_file_backup_info(st_date, en_date)
+        file_backup = FileBackup()
+        result['File_Backup'] = file_backup.get_file_backup_info()
         result = email_backup_format(result,'backup_report')
         
         result['page_name'] = '数据库备份日报'
@@ -1200,8 +1178,9 @@ def email_backup_report():
         active = request.values.get('active','MySQL')
         backlist = BackupList()
         result = backlist.email_backup_report()
+        file_backup = FileBackup()
+        result['File_Backup'] = file_backup.get_file_backup_info()
         result = email_backup_format(result,'email_backup_report')
-        
         result['page_name'] = '邮件备份报告'
         result['active'] = active
         return render_template('email_backup_report.html',data=result)

@@ -4,7 +4,7 @@
 '''
 A lightweight class to operate MySQL,
 
-It comes from (http://www.tudaxia.com).
+Reference: http://www.tudaxia.com.
 '''
 
 import MySQLdb
@@ -44,7 +44,7 @@ class MySQL_lightweight:
             else:
                 raise Exception(error_msg)
         
-        self._cur = self._conn.cursor()
+        self._cur = self._conn.cursor(MySQLdb.cursors.DictCursor)
         self._instance = MySQLdb
  
     def query(self,sql):
@@ -84,6 +84,11 @@ class MySQL_lightweight:
     def fetchAllRows(self):
         u'返回结果列表'
         return self._cur.fetchall()
+
+    def fetchAllArray(self):
+        u'返回结果数组'
+        rows = self._cur.fetchall()
+        return self.rows2array(rows)
  
     def fetchOneRow(self):
         u'返回一行结果，然后游标指向下一行。到达最后一行以后，返回None'
@@ -109,9 +114,19 @@ class MySQL_lightweight:
         except:
             pass
         
-    def  close(self):
+    def close(self):
         u'关闭数据库连接'
         self.__del__()
+
+    def rows2array(self, data):
+        u'列表格式转化为数组格式: () ---> []'
+        result = []
+        for da in data:
+            if type(da) is not dict:
+                raise Exception('Format Error: data is not a dict')
+            result.append(da)
+        return result
+
  
  
 if __name__ == '__main__':

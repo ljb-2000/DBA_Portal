@@ -2,7 +2,7 @@
 
 import requests as requests
 import json
-from config import CMDB_API_ADDR
+from cmdb_config import CMDB_API_ADDR
 
 
 class CmdbApiCallException(Exception):
@@ -27,7 +27,7 @@ class CmdbApiBase:
     def __init__(self, __api_addr=CMDB_API_ADDR):
         self.__api_addr = __api_addr
 
-    def __call_interface__(self, module_name, interface_name, json_obj=None,timeout=10):
+    def __call_interface__(self, module_name, interface_name, json_obj=None,timeout=20):
         """
         :rtype : dict
         """
@@ -51,5 +51,5 @@ class CmdbApiBase:
                 fp.raise_for_status()
         except Exception, e:
             msg = "%s: %s" % (type(e).__name__, e.message)
-            raise Exception('调用CMDB服务失败...')
+            raise Exception('Fail to call CMDB service...')
             

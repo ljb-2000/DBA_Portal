@@ -6,3 +6,5 @@ sb-admin-2/
 env/
 config.py
 *.log
+cmdb_config.py
+backup_config.py
