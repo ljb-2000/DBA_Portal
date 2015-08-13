@@ -63,7 +63,7 @@ if __name__ == '__main__':
     email_backup_report = AppConfig.PORTAL_SITE + '/email_backup_report'
     content = urllib2.urlopen(email_backup_report).read()
     conn_count = 1
-    while conn_count < 1024 and ('Connection aborted' in content or '10.1.1.193' in content or 'read timeout' in content):
+    while conn_count < 1024 and ('Connection aborted' in content or '10.1.1.193' in content or 'read timeout' in content or 'Fail to call CMDB service' in content):
         print 'connect fail, reconnect after %d s...' % conn_count
         time.sleep(conn_count)
         conn_count *= 4
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     #     if flag == 0:
     #         content_need += ('\n' + line)
 
-    if not ('Connection aborted' not in content and '10.1.1.193' in content and 'read timeout' in content and u'失败' in content):
+    if not ('Connection aborted' in content and '10.1.1.193' in content and 'read timeout' in content and 'Fail to call CMDB service' in content):
         sendTo = AppConfig.SEND_TO
         sendmail_data = {'sendTo':sendTo, 'subject':'数据库备份日报', 'message':''}
         sendmail_data['message'] = content

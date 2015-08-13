@@ -1127,8 +1127,6 @@ def email_backup_format(result, which_page):
                 info_sorted[cluster_type].append(tmp)
 
 #backup important files
-    print type(result['File_Backup']['data_size'])
-    print '#----------test int ---------------#'
     result['File_Backup']['data_size'] = byte2humanread(result['File_Backup']['data_size'])
     file_backup = result['File_Backup']['info']
     for f_backup in file_backup:
