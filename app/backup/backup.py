@@ -66,6 +66,7 @@ class FileBackup(object):
             result['data_size'] += item['file_size']
         result['failed'] = len(need_backup)
         result['info'] = items
+        result['bak_server'] = AppConfig.FILE_BACKUP_server
         return result
 
 if __name__ == '__main__':
