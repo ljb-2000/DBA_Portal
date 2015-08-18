@@ -69,6 +69,16 @@ class FileBackup(object):
         result['bak_server'] = AppConfig.FILE_BACKUP_server
         return result
 
+    def get_latest_server_use(self, ip):
+        if not (ip):
+            raise Exception('It is not a valid ip.')
+        sql = "Select IP, Path, DiskUse, AddTime from Backup_ServerUseFraction where IP='%s' Order by AddTime Desc limit 1;" % ip
+        print sql
+        self._db.query(sql)
+        result = self._db.fetchOneRow()
+        return result
+
+
 if __name__ == '__main__':
     test = FileBackup()
     result = test.get_file_backup_info()

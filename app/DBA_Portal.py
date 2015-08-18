@@ -1178,6 +1178,9 @@ def email_backup_report():
         result = backlist.email_backup_report()
         file_backup = FileBackup()
         result['File_Backup'] = file_backup.get_file_backup_info()
+        server_use = file_backup.get_latest_server_use(AppConfig.FILE_BACKUP_server)
+        if server_use:
+            result['File_Backup']['disk_use'] = server_use['DiskUse']
         result = email_backup_format(result,'email_backup_report')
         result['page_name'] = '邮件备份报告'
         result['active'] = active
