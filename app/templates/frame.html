@@ -14,14 +14,13 @@ set side_bar_tree = {
 1:{'func_name':'backup_center', 'show_name':'备份中心', 'next_level':{}},
 2:{'func_name':'migration_center', 'show_name':'迁移中心', 'next_level':{}}
 } },
-}
-%}
-
-{#3:{ 'func_name':'monitor','show_name':'Monitor','icon':'fa-bar-chart-o','next_level':{
+3:{ 'func_name':'monitor','show_name':'Monitor','icon':'fa-bar-chart-o','next_level':{
 0:{'func_name':'metrics', 'show_name':'Metrics', 'next_level':{}},
 1:{'func_name':'slowlog', 'show_name':'Slow Log', 'next_level':{}},
 2:{'func_name':'query_monitor', 'show_name':'Query Monitor', 'next_level':{}},
-} },#}
+} },
+}
+%}
 
 {% block realbody %}
 <div id="wrapper">

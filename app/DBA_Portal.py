@@ -1160,7 +1160,7 @@ def backup_report():
         result['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
         result['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
         result['active'] = active
-        
+
         backup_date = request.args.get('backup_date', False)
         if not check_date(backup_date):
             backup_date = datetime.date.today()

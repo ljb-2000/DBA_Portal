@@ -81,8 +81,8 @@
 			{% endif %}
 			{{ table_data["disk_use"] }}
 			{% else %}
-			<td>
-			  {% endif %}
+		      <td>
+			{% endif %}
 		      </td>
                     </tr>
 		  </tbody>
@@ -179,67 +179,68 @@
 	    </div>
 	    {% endif %}
 	    {% endfor %}
-
-
-	    {% for type in ['File_Backup'] %}
-	    {% if data[type] and data[type]['info'] %}
-	    {% set table_data = data[type]['info'] %}
-	    <h3>{{ data[type]['title'] }}备份详细信息</h3>
-	    <div id="detail_{{ type }}">
-	      {% set style_backup_detail_table = "font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border:solid black 1px;border-collapse:collapse;" %}
-	      <table class="backup_detail_table" id="table_detail_{{ type }}" style="{{style_backup_detail_table}}">
-		<thead>
-		  <tr>
-		    {% set style_backup_detail_table_th = "text-align:center; padding: 8px; background:#7A9EAF; font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border: solid black 1px;" %}
-		    <th style="{{style_backup_detail_table_th}}">文件名</th>
-		    <th style="{{style_backup_detail_table_th}}">所在机器</th>
-		    <th style="{{style_backup_detail_table_th}}">备份种类</th>
-		    <th style="{{style_backup_detail_table_th}}">大小</th>
-		  </tr>
-		</thead>
-		<tbody>
-		  {% for f_backup in table_data %}
-		  {% set detail = f_backup %}
-		  <tr>
-		    {% set style_backup_detail_table_td = "text-align:center; padding: 8px; background:#ffffff; font-family: verdana,arial,sans-serif; font-size:15px; border: solid black 1px;" %}
-		    <td style="{{style_backup_detail_table_td}}">
-		      {% if detail['file_name'] != '' %}
-		      {{ detail['file_name'] }}
-		      {% else %}
-		      -
-		      {% endif %}
-		    </td>
-		    <td style="{{style_backup_detail_table_td}}">
-		      {% if detail['bak_keep_host'] != '' %}
-		      {{ detail['bak_keep_host'] }}
-		      {% else %}
-		      -
-		      {% endif %}
-		    </td>
-		    <td style="{{style_backup_detail_table_td}}">
-		      {% if detail['name'] != '' %}
-		      {{ detail['name'] }}
-		      {% else %}
-		      -
-		      {% endif %}
-		    </td>
-		    <td style="{{style_backup_detail_table_td}}">
-		      {% if detail['file_size'] != '' %}
-		      {{ detail['file_size'] }}
-		      {% else %}
-		      -
-		      {% endif %}
-		    </td>
-		  </tr>
-		  {% endfor %}
-		</tbody>
-	      </table>
-	    </div>
-	    {% endif %}
-	    {% endfor %}
-
-
 	  </div>
+	</div>
+
+	<div>
+	  {% for type in ['File_Backup'] %}
+	  {% if data[type] %}
+	  <h3>{{ data[type]['title'] }}备份详细信息</h3>
+	  {% endif %}
+	  <div id="detail_{{ type }}">
+	    {% set style_backup_detail_table = "font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border:solid black 1px;border-collapse:collapse;" %}
+	    <table class="backup_detail_table" id="table_detail_{{ type }}" style="{{style_backup_detail_table}}">
+	      <thead>
+		<tr>
+		  {% set style_backup_detail_table_th = "text-align:center; padding: 8px; background:#7A9EAF; font-family: verdana,arial,sans-serif; font-size:15px; color:#333333; border: solid black 1px;" %}
+		  <th style="{{style_backup_detail_table_th}}">文件名</th>
+		  <th style="{{style_backup_detail_table_th}}">所在机器</th>
+		  <th style="{{style_backup_detail_table_th}}">备份种类</th>
+		  <th style="{{style_backup_detail_table_th}}">大小</th>
+		</tr>
+	      </thead>
+	      <tbody>
+		{% if data[type] and data[type]['info'] %}
+		{% set table_data = data[type]['info'] %}
+		{% for f_backup in table_data %}
+		{% set detail = f_backup %}
+		<tr>
+		  {% set style_backup_detail_table_td = "text-align:center; padding: 8px; background:#ffffff; font-family: verdana,arial,sans-serif; font-size:15px; border: solid black 1px;" %}
+		  <td style="{{style_backup_detail_table_td}}">
+		    {% if detail['file_name'] != '' %}
+		    {{ detail['file_name'] }}
+		    {% else %}
+		    -
+		    {% endif %}
+		  </td>
+		  <td style="{{style_backup_detail_table_td}}">
+		    {% if detail['bak_keep_host'] != '' %}
+		    {{ detail['bak_keep_host'] }}
+		    {% else %}
+		    -
+		    {% endif %}
+		  </td>
+		  <td style="{{style_backup_detail_table_td}}">
+		    {% if detail['name'] != '' %}
+		    {{ detail['name'] }}
+		    {% else %}
+		    -
+		    {% endif %}
+		  </td>
+		  <td style="{{style_backup_detail_table_td}}">
+		    {% if detail['file_size'] != '' %}
+		    {{ detail['file_size'] }}
+		    {% else %}
+		    -
+		    {% endif %}
+		  </td>
+		</tr>
+		{% endfor %}
+	      	{% endif %}
+	      </tbody>
+	    </table>
+	  </div>
+	  {% endfor %}
 	</div>
 
 
