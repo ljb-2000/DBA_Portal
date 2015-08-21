@@ -1154,8 +1154,11 @@ def backup_report():
         result = backlist.email_backup_report()
         file_backup = FileBackup()
         result['File_Backup'] = file_backup.get_file_backup_info()
+        server_use = file_backup.get_latest_server_use(AppConfig.FILE_BACKUP_server)
+        if server_use:
+            result['File_Backup']['disk_use'] = server_use['DiskUse']
+
         result = email_backup_format(result,'backup_report')
-        
         result['page_name'] = '数据库备份日报'
         result['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
         result['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
