@@ -3,7 +3,7 @@ import requests,json,flask
 import sys,time,re,datetime
 import bs4
 
-from flask import Flask,render_template,request,url_for,redirect,flash,current_app
+from flask import Flask,render_template,request,url_for,redirect,flash,current_app,abort
 from datetime import timedelta
 
 from cmdb.server import ServerList
@@ -49,8 +49,9 @@ def have_accessed():
             return False
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
-
+        
 
 def add_authority_parameters(query_condition=None):
     """
@@ -71,6 +72,7 @@ def add_authority_parameters(query_condition=None):
         return query_condition
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
 
 def get_parameters_from_url(request_url=request,query_key=None):
@@ -373,19 +375,20 @@ def operate_server(operate_type=None,server_id=None):
 
         if operate_type == 'offline':
             query_result = host_info.offline_by_id(server_id)
-            flash('服务器下线成功.', 'success')
+            flash('服务器异步下线成功...请勿再次下线相同机器！', 'success')
         elif operate_type == 'online':
             query_result = host_info.online_by_id(server_id)
-            flash('服务器上线成功.', 'success')
+            flash('服务器异步上线成功...请勿再次上线相同机器！', 'success')
         elif operate_type == 'delete':
             query_result = host_info.delete_by_id(server_id)
-            flash('服务器删除成功.', 'success')
+            flash('服务器异步删除成功...请勿再次删除相同机器！', 'success')
         return redirect(url_for('server_list'))
     except CmdbApiCallException, e:
         flash(e.detail_msg(), 'danger')
         return render_template('blank.html')
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -419,6 +422,7 @@ def server_info(server_id=None):
         return render_template('blank.html')
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -451,9 +455,11 @@ def init_system(server_id=None):
         return render_template('init_system.html', data=data)
     except CmdbApiCallException, e:
         flash(e.detail_msg(), 'danger')
+        app.logger.error(str(e))
         return render_template('blank.html')
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -488,9 +494,11 @@ def server_info_edit(server_id=None):
         return render_template('serverinfoedit.html', data=data)
     except CmdbApiCallException, e:
         flash(e.detail_msg(), 'danger')
+        app.logger.error(str(e))
         return render_template('blank.html')
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -523,10 +531,13 @@ def standby_list():
         return render_template('standbylist.html', data=data)
     except CmdbApiCallException, e:
         flash(e.detail_msg(), 'danger')
+        app.logger.error(str(e))
         return render_template('blank.html')
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
+        app.logger.error(str(e))
         return render_template('blank.html')
 
 @app.route("/server_list")
@@ -587,10 +598,12 @@ def server_list():
         return render_template('server_list.html', data=data)
     except CmdbApiCallException, e:
         flash(e.detail_msg(), 'danger')
+        app.logger.error(str(e))
         return render_template('blank.html')
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
+        app.logger.error(str(e))
         return render_template('blank.html')
 
 @app.route("/applyserver")
@@ -628,11 +641,13 @@ def applyserver():
         data['form'] = filter_form
         data['comment'] = comment
         return render_template('applyserver.html', data=data)
-    except CmdbApiCallException, e:
+    except CmdbApiCallException, e:        
+        app.logger.error(str(e))
         flash(e.detail_msg(), 'danger')
         return render_template('blank.html')
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -654,9 +669,11 @@ def applyresult():
         data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
         return render_template('applyresult.html', data=data)
     except CmdbApiCallException, e:
+        app.logger.error(str(e))
         flash(e.detail_msg(), 'danger')
         return render_template('blank.html')
     except Exception, e:
+        app.logger.error(str(e))
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
         return render_template('blank.html')
@@ -714,6 +731,7 @@ def install_db(db_type=None):
         flash(e.detail_msg(), 'danger')
         return render_template('blank.html')
     except Exception, e:
+        app.logger.error(str(e))
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
         return render_template('blank.html')
@@ -739,9 +757,11 @@ def install_result(db_type=None):
         data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
         return render_template('install_db_result.html', data=data)
     except CmdbApiCallException, e:
+        app.logger.error(str(e))
         flash(e.detail_msg(), 'danger')
         return render_template('blank.html')
     except Exception, e:
+        app.logger.error(str(e))
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
         return render_template('blank.html')
@@ -784,9 +804,11 @@ def add_server():
         data['page_data'] = page_data
         return render_template('addserver.html', data=data)
     except CmdbApiCallException, e:
+        app.logger.error(str(e))
         flash(e.detail_msg(), 'danger')
         return render_template('blank.html')
     except Exception, e:
+        app.logger.error(str(e))
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
         return render_template('blank.html')
@@ -804,6 +826,7 @@ def get_product(bu):
             result +=[re['product_name']]
         return json.dumps(result)
     except Exception,e:
+        app.logger.error(str(e))
         return json.dumps([])
 
 ###################################
@@ -851,10 +874,12 @@ def instance_list():
         data['filter_form'] = filter_form
         return render_template('instance_list.html', data=data)
     except CmdbApiCallException, e:
+        app.logger.error(str(e))
         flash(e.detail_msg(), 'danger')
         return render_template('blank.html')
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -888,10 +913,12 @@ def instance_info(id=None):
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
         return render_template('instanceinfo.html', data=data)
     except CmdbApiCallException, e:
+        app.logger.error(str(e))
         flash(e.detail_msg(), 'danger')
         return render_template('blank.html')
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -936,9 +963,11 @@ def add_instance():
         return render_template('addinstance.html', data=data)
     except CmdbApiCallException, e:
         flash(e.detail_msg(), 'danger')
+        app.logger.error(str(e))
         return render_template('blank.html')
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -968,9 +997,11 @@ def operate_instance(operate_type=None):
         flash('%s %s:%s Success' % (operate_type,query_condition['ip'],query_condition['port']), 'danger')
         return redirect('/instance_list')
     except CmdbApiCallException, e:
+        app.logger.error(str(e))
         flash(e.detail_msg(), 'danger')
         return render_template('blank.html')
     except Exception, e:
+        app.logger.error(str(e))
         msg = "%s: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
         return render_template('blank.html')
@@ -995,7 +1026,9 @@ def schema_list():
         return render_template('schemalist.html', data=data)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
+        return render_template('blank.html')
 
 @app.route("/cluster_list")
 def cluster_list():
@@ -1013,7 +1046,9 @@ def cluster_list():
         return render_template('clusterlist.html', data=data)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
+        return render_template('blank.html')
 
 @app.route("/test")
 def test():
@@ -1030,7 +1065,9 @@ def test():
         return render_template('test.html', data=data)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
+        return render_template('blank.html')
 
 
 ###################################
@@ -1092,6 +1129,7 @@ def backup_center():
         data['goodbackup']="成功备份"
         return render_template('backup_center.html', data=data, data_instance=backup_instance)
     except Exception,e:
+        app.logger.error(str(e))
         flash(e,'danger')
         return render_template('blank.html')
 
@@ -1170,6 +1208,7 @@ def backup_report():
             backup_date = backup_date.strftime("%Y-%m-%d")
         return render_template('backup_report.html',data=result,backup_date=backup_date)
     except Exception,e:
+        app.logger.error(str(e))
         flash(e,'danger')
         return render_template('blank.html')
 
@@ -1189,6 +1228,7 @@ def email_backup_report():
         result['active'] = active
         return render_template('email_backup_report.html',data=result)
     except Exception,e:
+        app.logger.error(str(e))
         flash(e,'danger')
         return render_template('blank.html')
 
@@ -1213,6 +1253,7 @@ def del_backup():
         return render_template('blank.html')
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -1254,9 +1295,11 @@ def add_backup():
             query_condition['backup_form'] = backup_form
             return render_template('addbackup.html',data=query_condition)
     except (CmdbApiCallException, requests.ConnectionError), e:
+        app.logger.error(str(e))
         flash(e.message, 'danger')
         return render_template('blank.html')
     except Exception, e:
+        app.logger.error(str(e))
         msg = "[%s]: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
         return render_template('blank.html')
@@ -1278,10 +1321,12 @@ def switch_flag():
         backup_list.switch_flag(data=query_condition)
         return redirect('/backup_report')
     except (CmdbApiCallException, requests.ConnectionError), e:
+        app.logger.error(str(e))
         flash(e.message, 'danger')
         return render_template('blank.html')
     except Exception, e:
         msg = "[%s]: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -1302,6 +1347,7 @@ def migration_center():
         return render_template('migration_center.html', data=data)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -1315,6 +1361,7 @@ def metrics():
         return render_template('blank.html', data=data)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -1327,6 +1374,7 @@ def slowlog():
         return render_template('blank.html', data=data)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -1339,6 +1387,7 @@ def query_monitor():
         return render_template('blank.html', data=data)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -1349,6 +1398,7 @@ def blank():
         return render_template('blank.html', data=data)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -1358,6 +1408,7 @@ def index():
         return redirect(url_for('login'))
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -1411,6 +1462,7 @@ def login():
         return flask.redirect(redirect_url)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -1435,6 +1487,7 @@ def logout():
         return flask.redirect(redirect_url)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
 
@@ -1515,9 +1568,11 @@ def my_workflow():
         data['cas_name'] = flask.session['CAS_NAME']
         return render_template('my_workflow.html',data=data)
     except (CmdbApiCallException, requests.ConnectionError), e:
+        app.logger.error(str(e))
         flash(e.message, 'danger')
         return render_template('blank.html')
     except Exception, e:
+        app.logger.error(str(e))
         msg = "[%s]: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
         return render_template('blank.html')
@@ -1544,9 +1599,11 @@ def dashboard():
         return render_template('dashboard.html', data=data)
 
     except (CmdbApiCallException, requests.ConnectionError), e:
+        app.logger.error(str(e))
         flash(e.message, 'danger')
         return render_template('dashboard.html', data=data)
     except Exception, e:
+        app.logger.error(str(e))
         msg = "[%s]: %s" % (type(e).__name__, e.message)
         flash(msg, 'danger')
         return render_template('blank.html')
