@@ -1134,6 +1134,99 @@ def backup_center():
         return render_template('blank.html')
 
 
+@app.route("/set_backup_config, methods=['GET', 'POST']")
+def set_backup_config():
+    """
+    Description: set backukup configure
+    Example:
+    ### portal.dba.dp//set_backup_config/10.1.1.111/3306
+    """
+
+    if not have_accessed():
+        return redirect(url_for('login'))
+    try:
+        if request.method == 'POST':
+            supported_query_key = ['server_id', 'server_ip', 'mirror', 'comment']
+            query_condition = get_parameters_from_url(request,supported_query_key)
+            host_info = ServerList()
+            result = host_info.init_system_with_mirror(query_condition)
+            flash('System initial request sent', 'success')
+        else:
+            if not server_id or server_id == 0:
+                page_data = ''
+
+        supported_query_key = ['id','ip','time','port']
+        query_condition = dict()
+        query_condition = get_parameters_from_url(request,supported_query_key)
+        print '#--------------#'
+        print query_condition
+        
+# query_condition = add_authority_parameters(query_condition)
+
+        # if not query_condition['ip'] or not query_condition['port']:
+        #     return redirect('/backup_report')
+        # backup_list =BackupList()
+        # backup_list.switch_flag(data=query_condition)
+
+        return redirect(url_for('test_backup_center'))
+    except Exception,e:
+        app.logger.error(str(e))
+        flash(e,'danger')
+        return render_template('blank.html')
+
+
+@app.route("/backup_config/<ip>/<port>")
+def backup_config(ip=None, port=None):
+    if not have_accessed():
+        return redirect(url_for('login'))
+    try:
+        if not (ip and port):
+            flash('缺少IP或端口', 'danger')
+            return redirect(url_for('backup_center'))
+
+        backup_list = BackupList()
+        backup_configure = backup_list.backup_configure()
+
+        data = {'backup_configure':backup_configure}
+        data['page_name']="配置备份参数"
+        data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
+        data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
+        print '##--------------#'
+        return render_template('backup_config.html', data=data)
+    except Exception,e:
+        app.logger.error(str(e))
+        flash(e,'danger')
+        return render_template('blank.html')
+
+
+@app.route("/test_backup_center")
+def test_backup_center():
+    if not have_accessed():
+        return redirect(url_for('login'))
+    try:
+        backup_list = BackupList()
+        backup_info = backup_list.mha()
+        backup_configure = backup_list.backup_configure()
+
+        if not backup_info.has_key('mmm'):
+            backup_info['mmm'] = ''
+        #mmm = sort_cluster_by_backup_status(backup_info['mmm'])
+        mha = sort_cluster_by_backup_status(backup_info['mha'])
+        #data = {'mmm':mmm, 'mha':mha}
+        data = {'mha':mha}
+        data['page_name']="备份中心"
+        data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
+        data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
+        data['nonbackup']="尚未备份"
+        data['warningbackup']="警告备份"
+        data['goodbackup']="成功备份"
+        return render_template('test_backup_center.html', data=data, data_configure=backup_configure)
+    except Exception,e:
+        app.logger.error(str(e))
+        flash(e,'danger')
+        return render_template('blank.html')
+
+
 def email_backup_format(result, which_page):
     info_sorted = {"MongoDB":[],"MySQL_cluster":[],"MySQL_single":[],"File_Backup":[]}
     for cluster_type in ['MongoDB', 'MySQL_cluster', 'MySQL_single']:
@@ -1329,7 +1422,6 @@ def switch_flag():
         app.logger.error(str(e))
         flash(msg, 'danger')
         return render_template('blank.html')
-
 
 
 @app.route("/migration_center")

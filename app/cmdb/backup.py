@@ -5,7 +5,7 @@ class BackupList(CmdbApiBase):
         result = self.__call_interface__('BACKUP','backup_info',json_obj=None)
         return result
 
-    def backup_report(self):
+    def backup_configure(self):
         result = self.__call_interface__('BACKUP','backup_report',json_obj=None)
         return result
 

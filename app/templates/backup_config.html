@@ -1,0 +1,60 @@
+{% extends "frame.html" %}
+{% set level1_name='backup' %}
+{% set level2_name='backup_center' %}
+{% block page_wrapper %}
+    <div class="row">
+      <div class="col-lg-12"><div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    Machine Info For Server: {{ data['page_data']['server_id'] }}
+                </div>
+                <div class="panel-body" style="display:inline">
+                    <dl class="dl-horizontal">
+                    {% if data['page_data']['machine_info'] %}
+                         <div class="col-lg-6">
+				 <dt>服务器序列号</dt> <dd>{{ data['page_data']['machine_info']['sn'] }}</dd>
+				 <dt>机柜位置</dt> <dd>{{ data['page_data']['machine_info']['rack_location'] }}</dd>
+				 <dt>ssh端口</dt> <dd>{{ data['page_data']['machine_info']['ssh_port'] }}</dd>
+				 <dt>服务器型号</dt> <dd>{{ data['page_data']['machine_info']['device_spec'] }}</dd>
+				 <dt>内核版本</dt> <dd>{{ data['page_data']['machine_info']['kernel_version'] }}</dd>
+				 <dt>逻辑CPU数量</dt> <dd>{{ data['page_data']['machine_info']['logic_cpu_count'] }}</dd>
+				 <dt>RAID</dt> <dd>{{ data['page_data']['machine_info']['raid'] }}</dd>
+				 <dt>主机名</dt> <dd>{{ data['page_data']['machine_info']['hostname'] }}</dd>
+				 <dt>ilo卡MAC地址</dt> <dd>{{ data['page_data']['machine_info']['ilo_mac'] }}</dd>
+				 <dt>环境</dt> <dd>{{ data['page_data']['machine_info']['env'] }}</dd>
+				 <dt>vnc_port</dt> <dd>{{ data['page_data']['machine_info']['vnc_port'] }}</dd>
+				 <dt>采购日期</dt> <dd>{{ data['page_data']['machine_info']['buy_date'] }}</dd>
+				 <dt>过保日期</dt> <dd>{{ data['page_data']['machine_info']['maintain_enddate'] }}</dd>
+				 <dt>机柜中位置</dt> <dd>{{ data['page_data']['machine_info']['rack_location'] }}</dd>
+				 <dt>Phoenix Kernel 版本号</dt> <dd>{{ data['page_data']['machine_info']['phoenix_kernel'] }}</dd>
+                 <dt>PCIE卡</dt> <dd>{{ data['page_data']['machine_info']['pcie_card'] }}</dd>
+                        </div>
+                         <div class="col-lg-6">
+				 <dt>UUID</dt> <dd>{{ data['page_data']['machine_info']['uuid'] }}</dd>
+				 <dt>IP地址</dt> <dd>{{ data['page_data']['machine_info']['private_ip'][0] }}</dd>
+				 <dt>服务器厂家</dt> <dd>{{ data['page_data']['machine_info']['manufacturer'] }}</dd>
+				 <dt>操作系统版本</dt> <dd>{{ data['page_data']['machine_info']['os_version'] }}</dd>
+				 <dt>物理CPU数量</dt> <dd>{{ data['page_data']['machine_info']['cpu_count'] }}</dd>
+				 <dt>超线程</dt> <dd>{{ data['page_data']['machine_info']['hyper_threading'] }}</dd>
+				 <dt>虚拟机信息</dt> <dd>{{ data['page_data']['machine_info']['vserver_info'] }}</dd>
+				 <dt>ilo卡IP</dt> <dd>{{ data['page_data']['machine_info']['ilo_ip'] }}</dd>
+				 <dt>IDC</dt> <dd>{{ data['page_data']['machine_info']['idc'] }}</dd>
+				 <dt>状态</dt> <dd>{{ data['page_data']['machine_info']['status'] }}</dd>
+				 <dt>内存大小</dt> <dd>{{ data['page_data']['machine_info']['ram_size'] }}</dd>
+				 <dt>保修开始日期</dt> <dd>{{ data['page_data']['machine_info']['maintain_startdate'] }}</dd>
+				 <dt>系统负责人</dt> <dd>{{ data['page_data']['machine_info']['sys_duty'] }}</dd>
+				 <dt>Phoenix Agent 版本号</dt> <dd>{{ data['page_data']['machine_info']['phoenix_agent'] }}</dd>
+				 <dt>是宿主机</dt> <dd>{{ data['page_data']['machine_info']['is_host'] }}</dd>
+                 <dt>备注</dt> <dd>{{ data['page_data']['machine_info']['comment'] }}</dd>
+                        </div>
+
+                    {% endif %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div></div>
+
+    </div>
+{% endblock %}
