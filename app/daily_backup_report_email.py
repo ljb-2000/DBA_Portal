@@ -88,14 +88,19 @@ if __name__ == '__main__':
     #     if flag == 0:
     #         content_need += ('\n' + line)
 
-    if not ('Connection aborted' in content and '10.1.1.193' in content and 'read timeout' in content and 'Fail to call CMDB service' in content):
+    if 'cluster_backup_report_detail' in content:
         sendTo = AppConfig.SEND_TO
         sendmail_data = {'sendTo':sendTo, 'subject':'数据库备份日报', 'message':''}
         sendmail_data['message'] = content
         tool_sendmail = AppConfig.CMDB_SITE + '/TOOL/sendmail'
         print requests.get(tool_sendmail, data=sendmail_data).text
-    elif 'cluster_backup_report_detail' in content:
+    elif ('Connection aborted' in content and '10.1.1.193' in content and 'read timeout' in content and 'Fail to call CMDB service' in content):
         sendTo = AppConfig.SEND_TO_DEV
-        sendmail_data = {'sendTo':sendTo, 'subject':'出错了！！！', 'message':'数据库备份日报, dev:192.168.222.156; online:10.1.1.193;'}
+        sendmail_data = {'sendTo':sendTo, 'subject':'5000服务出错！！！', 'message':'数据库备份日报, dev:192.168.222.156; online:10.1.1.193;'}
+        tool_sendmail = AppConfig.CMDB_SITE + '/TOOL/sendmail'
+        print requests.get(tool_sendmail, data=sendmail_data).text
+    else:
+        sendTo = AppConfig.SEND_TO_DEV
+        sendmail_data = {'sendTo':sendTo, 'subject':'PORTAl服务出错！！！', 'message':'数据库备份日报, dev:192.168.222.156; online:10.1.1.193;'}
         tool_sendmail = AppConfig.CMDB_SITE + '/TOOL/sendmail'
         print requests.get(tool_sendmail, data=sendmail_data).text

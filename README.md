@@ -1,33 +1,35 @@
-## DBA Portal
-
 ---
 
-DBA_Portal is the web manager which help DBAs to operate efficiently.
+**DBA Portal** 是一款数据库自动化运维的web应用。
 
-It includes:
+###主要包含以下功能：
 
-Apply and manage servers.
+- 服务器管理：服务器的申请和管理；
 
-Install MySQL, MongoDB, Memcache.
+- 数据库管理：MySQL、MongoDB、Memcached数据库的部署安装与下线；
 
-Manage DB instances.
+- DB实例管理：MySQL、MongoDB、Memcached实例的上下线；
 
-Monitor MHA Cluster.
+- DB集群管理：MHA集群信息的查询
 
-DB(file) backup and recovery.
+- 备份中心：MySQL集群与MySQL单实例的备份配置与备份管理
+ 
+- 数据库备份日报
 
----
 
-Following techniques were used in this project,
 
-frontend template from: http://startbootstrap.com/template-overviews/sb-admin-2/
+###DBA Portal 基本架构：
 
-web framework "flask" from : http://flask.pocoo.org/
+- Python Web 开发框架 [Flask](http://flask.pocoo.org/)；
 
-web template from: http://jinja.pocoo.org/docs/dev/
+- 前端模板来自 [startbootstrap.com/](http://startbootstrap.com/template-overviews/sb-admin-2/);
 
----
+- Web template [jinja](http://jinja.pocoo.org/docs/dev/);
 
-If you have any suggestions, contact me!
+- Python 虚拟环境[virtualenv](https://virtualenv.pypa.io/);
 
-My Email: cdf4026176@aliyun.com
+- 数据库 MySQL 5.6.24-72.2, MySQLdb;
+
+- 缓存层 Redis 3.0.3， Redis Python 客户端 [redis-py](https://github.com/andymccurdy/redis-py);
+
+
