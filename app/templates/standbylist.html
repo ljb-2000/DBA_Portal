@@ -57,15 +57,18 @@
 	{% set disabled = "" %}
 	{% endif %}
 	<a type="button" {{disabled}} class="btn btn-warning" onclick="apply()">申请服务器</a>
-	&nbsp;&nbsp; | &nbsp;&nbsp;
-        <form id="query_form" role="form" class="form-inline" action="{{ url_for('standby_list') }}" method="GET" style="margin-bottom:0px; display: inline">
-          {%  set form = data['filter_form'] %}
-          {{ btstrp.render_field(form.idc, label_visible=true, value=form['idc']) }}
-          {{ btstrp.render_field(form.cpu, label_visible=true, value=form['cpu']) }}
-          {{ btstrp.render_field(form.ram_size, label_visible=true, value=form['ram_size']) }}
-          &nbsp;&nbsp;&nbsp;<button type="submit" class="btn btn-primary">查询</button>
-          <a class="btn btn-primary" onclick="formReset()">重置</a>
-        </form>
+
+	<div hidden="hidden">
+	  &nbsp;&nbsp; | &nbsp;&nbsp;
+          <form id="query_form" role="form" class="form-inline" action="{{ url_for('standby_list') }}" method="GET" style="margin-bottom:0px; display: inline">
+            {%  set form = data['filter_form'] %}
+            {{ btstrp.render_field(form.idc, label_visible=true, value=form['idc']) }}
+            {{ btstrp.render_field(form.cpu, label_visible=true, value=form['cpu']) }}
+            {{ btstrp.render_field(form.ram_size, label_visible=true, value=form['ram_size']) }}
+            &nbsp;&nbsp;&nbsp;<button type="submit" class="btn btn-primary">查询</button>
+            <a class="btn btn-primary" onclick="formReset()">重置</a>
+          </form>
+	</div>
       </div>
       <!-- /.panel-heading -->
       <div class="panel-body">

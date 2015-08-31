@@ -46,7 +46,7 @@ class ServerList(CmdbApiBase):
             return False
         return dba_list
 
-    def list_standby(self, data=None):
+    def list_available(self, data=None):
         result = self.__call_interface__('CMDB', 'getuseableserver', json_obj=data)
         return result
 
@@ -109,7 +109,7 @@ class ServerList(CmdbApiBase):
         result = self.__call_interface__('CMDB', 'serverstatechange/0', json_obj=info)
         return result
 
-    def get_total_cnt(self):
+    def get_total_count(self):
         result = self.__call_interface__('CMDB', 'getservercount')
         return result
 

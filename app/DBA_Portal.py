@@ -1,7 +1,7 @@
 # coding: utf8
 import requests,json,flask
 import sys,time,re,datetime
-import bs4
+import bs4, redis
 
 from flask import Flask,render_template,request,url_for,redirect,flash,current_app,abort
 from datetime import timedelta
@@ -19,6 +19,8 @@ from cas_urls import create_cas_logout_url
 from cas_urls import create_cas_validate_url
 
 from backup.backup import FileBackup
+
+from redispy.redispy import DBAPortalRedis
 
 try:
     from urllib import urlopen
@@ -513,8 +515,13 @@ def standby_list():
         data = dict()
         supported_query_key = ['idc', 'cpu', 'ram_size']
         query_condition = get_parameters_from_url(request,supported_query_key)
-        all_servers = ServerList()
-        page_data = all_servers.list_standby(data=query_condition)
+
+        dba_portal_redis = DBAPortalRedis()
+        server_available = dba_portal_redis.get_server_available()
+
+        #server_list = ServerList()
+        #page_data = server_list.list_available(data=query_condition)
+        page_data = server_available
         filter_form = StandbyServerInfoForm()
         filter_form = fill_standby_server_info_form(server_form=filter_form, **query_condition)
 
@@ -547,8 +554,13 @@ def server_list():
     try:
         supported_query_key = ['ram_size', 'idc', 'logic_cpu_count']
         query_condition = get_parameters_from_url(request,supported_query_key)
-        all_servers = ServerList()
-        filtered_servers = all_servers.list_all(data=query_condition)
+        
+        dba_portal_redis = DBAPortalRedis()
+        server_all = dba_portal_redis.get_server_all()
+
+        #all_servers = ServerList()
+        #filtered_servers = all_servers.list_all(data=query_condition)
+        filtered_servers = server_all
         inst_list = InstList()
         insts = [inst['server_ip'] for inst in inst_list.list_all()]
 
@@ -1106,8 +1118,8 @@ def sort_cluster_by_backup_status(clusters):
     return sorted_cluster
 
 
-@app.route("/backup_center")
-def backup_center():
+@app.route("/old_backup_center")
+def old_backup_center():
     if not have_accessed():
         return redirect(url_for('login'))
     try:
@@ -1127,7 +1139,7 @@ def backup_center():
         data['nonbackup']="尚未备份"
         data['warningbackup']="警告备份"
         data['goodbackup']="成功备份"
-        return render_template('backup_center.html', data=data, data_instance=backup_instance)
+        return render_template('old_backup_center.html', data=data, data_instance=backup_instance)
     except Exception,e:
         app.logger.error(str(e))
         flash(e,'danger')
@@ -1168,7 +1180,7 @@ def set_backup_config():
         # backup_list =BackupList()
         # backup_list.switch_flag(data=query_condition)
 
-        return redirect(url_for('test_backup_center'))
+        return redirect(url_for('backup_center'))
     except Exception,e:
         app.logger.error(str(e))
         flash(e,'danger')
@@ -1192,27 +1204,26 @@ def backup_config(ip=None, port=None):
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
         data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
         print '##--------------#'
-        return render_template('backup_config.html', data=data)
+        flash(data, 'danger')
+        return render_template('blank.html')
+        #return render_template('backup_config.html', data=data)
     except Exception,e:
         app.logger.error(str(e))
         flash(e,'danger')
         return render_template('blank.html')
 
 
-@app.route("/test_backup_center")
-def test_backup_center():
+@app.route("/backup_center")
+def backup_center():
     if not have_accessed():
         return redirect(url_for('login'))
     try:
-        backup_list = BackupList()
-        backup_info = backup_list.mha()
-        backup_configure = backup_list.backup_configure()
+        dba_portal_redis = DBAPortalRedis()
+        backup_mha = dba_portal_redis.get_backup_mha()
+        backup_single_instance = dba_portal_redis.get_backup_single_instance()
+        backup_configure = dba_portal_redis.get_backup_configure()
 
-        if not backup_info.has_key('mmm'):
-            backup_info['mmm'] = ''
-        #mmm = sort_cluster_by_backup_status(backup_info['mmm'])
-        mha = sort_cluster_by_backup_status(backup_info['mha'])
-        #data = {'mmm':mmm, 'mha':mha}
+        mha = sort_cluster_by_backup_status(backup_mha['mha'])
         data = {'mha':mha}
         data['page_name']="备份中心"
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
@@ -1220,7 +1231,7 @@ def test_backup_center():
         data['nonbackup']="尚未备份"
         data['warningbackup']="警告备份"
         data['goodbackup']="成功备份"
-        return render_template('test_backup_center.html', data=data, data_configure=backup_configure)
+        return render_template('backup_center.html', data=data, backup_configure=backup_configure, backup_single_instance=backup_single_instance)
     except Exception,e:
         app.logger.error(str(e))
         flash(e,'danger')
@@ -1281,8 +1292,11 @@ def backup_report():
     #     return redirect(url_for('login'))
     try:
         active = request.values.get('active','MySQL')
-        backlist = BackupList()
-        result = backlist.email_backup_report()
+
+        dba_portal_redis = DBAPortalRedis()
+        #backlist = BackupList()
+        #result = backlist.email_backup_report()
+        result = dba_portal_redis.get_backup_email_backup_report()
         file_backup = FileBackup()
         result['File_Backup'] = file_backup.get_file_backup_info()
         server_use = file_backup.get_latest_server_use(AppConfig.FILE_BACKUP_server)
@@ -1683,11 +1697,16 @@ def dashboard():
         data['task_list'] = task_list
         data['page_name'] = 'Dash Board'
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
-        servers = ServerList()
-        instances = InstList()
+        #servers = ServerList()
+        #instances = InstList()
+        
+        dba_portal_redis = DBAPortalRedis()
+        server_total_count = dba_portal_redis.get_server_total_count()
+        instance_total_count = dba_portal_redis.get_instance_total_count()
+
         data['page_data'] = dict()
-        data['page_data']['server_cnt'] = servers.get_total_cnt()
-        data['page_data']['instance_cnt'] = instances.get_total_cnt()
+        data['page_data']['server_cnt'] = server_total_count
+        data['page_data']['instance_cnt'] = instance_total_count
         return render_template('dashboard.html', data=data)
 
     except (CmdbApiCallException, requests.ConnectionError), e:
@@ -1701,5 +1720,7 @@ def dashboard():
         return render_template('blank.html')
 
 if __name__ == "__main__":
+    dba_portal_redis = DBAPortalRedis()
+    dba_portal_redis.init_dba_portal_redis()
     app.jinja_env.cache = None
     app.run(host='0.0.0.0', port=AppConfig.PORTAL_PORT)

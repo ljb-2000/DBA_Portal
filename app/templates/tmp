@@ -1,0 +1,70 @@
+      <!-- Tab of MySQL and MongoDB -->      
+      {% for type in ['MySQL','MongoDB'] %}
+      <div id="div_backup_{{type}}" style="display:none">
+	<br>
+	<br>
+	<table class="table table-bordered table-hover" id="table{{ type }}">
+	  <thead>
+	    <tr>
+	      <th>IP</th><th>Port</th><th>备份模式</th><th>备份数据库</th>
+	      <th>备份保留(天)</th><th>上次备份时间</th><th>备份结束时间</th>
+	      <th>下次备份时间</th><th>备份是否开启</th><th>备份是否成功</th>
+	      <th>备份信息</th><th>开启/关闭备份</th><th>删除备份</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    {% if backup_single_instance %}
+	    {% for detail in backup_single_instance | sort(attribute='ip') %}
+	    {% if detail['type']== type %}
+	    <tr>
+	      <td>{{ detail['ip'] }}</td>
+	      <td>{{ detail['port'] }}</td>
+	      <td>{{ detail['f_bak_mode'] }}</td>
+	      	      <td>{{ detail['backup_database'] }}</td>
+	      <td>{{ detail['f_bak_keep'] }}</td>
+	      <td>{{ detail['L_bak_time'] }}</td>
+	      <td>{{ detail['end_time'] }}</td>
+	      <td>
+		<a type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#modal_backup_configure" data-ip="{{ detail['ip'] }}" data-port="{{ detail['port'] }}">
+		  {{ detail['N_bak_time'] }}
+		</a>
+	      </td>
+	      {% if detail['flag']=='开启' %}
+	      <td style="color:green">
+                {% else %}
+	      <td style="color:red">
+                {% endif %}
+                {{ detail['flag'] }}
+	      </td>
+	      {% if detail['status']=='成功'%}
+	      <td style="color:green">
+		{% elif detail['status']=='失败' %}
+	      <td style="color:red">
+                {% else %}
+	      <td style="color:blue">
+                {% endif %}
+                {{ detail['status'] }}
+	      </td>
+	      <td>{{ detail['info'] }}</td>
+              <td>
+                <a type="button" {{disabled}} class="btn btn-primary btn-xs"
+		   href="{{ url_for('switch_flag',ip=detail.ip,port=detail.port) }}"
+		   onclick="return confirm('确认关闭/开启{{ detail.ip }}:{{ detail.port }}上的备份吗?')">
+		  开启/关闭备份
+                </a>
+	      </td>
+	      <td>
+                <a type="button" {{disabled}} class="btn btn-danger btn-xs"
+		   href="{{ url_for('del_backup',ip=detail.ip,port=detail.port,template='backup_report') }}"
+		   onclick="return confirm('确认删除{{ detail.ip }}:{{ detail.port }}上的备份吗?')" disabled>
+		  删除备份
+                </a>
+	      </td>
+	    </tr>
+	    {% endif %}
+	    {% endfor %}
+	    {% endif %}
+	  </tbody>
+        </table>
+      </div>
+      {% endfor %}

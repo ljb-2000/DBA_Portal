@@ -2,12 +2,11 @@
 {% import "bootstrap_form.html" as btstrp %}
 {% set level1_name='backup' %}
 {% set level2_name='backup_center' %}
-{% set backup_config = backup_configure['info'] %}
 {% block page_wrapper %}
 
 <script>
   function show_this_server_type(server_type) {
-  var server_types = new Array("MySQL_cluster", "MySQL");
+  var server_types = new Array("MySQL_cluster", "MongoDB", "MySQL");
   for (var i=0; i< server_types.length; i++) {
 		   var server_div = document.getElementById('div_backup_' + server_types[i]);
 		   if (server_type == server_types[i]) {
@@ -34,8 +33,8 @@
     <div class="tab-content">
       <ul class="nav nav-tabs" id="tab_backup">
         <li onclick="show_this_server_type('MySQL_cluster')" class="active"><a href="#">MySQL集群</a></li>
-	<li onclick="show_this_server_type('MySQL')"><a href="#">MySQL单实例</a></li>
-	<!-- <li onclick="show_this_server_type('MongoDB')"><a href="#">MongoDB实例</a></li> -->
+	<li onclick="show_this_server_type('MySQL')"><a href="#">MySQL实例</a></li>
+	<li onclick="show_this_server_type('MongoDB')"><a href="#">MongoDB实例</a></li>
       </ul>
     </div>
 
@@ -54,7 +53,6 @@
 	{% elif backup_type == 'goodbackup' %}
 	{% set type_color = 'green' %}
 	{% endif %}
-
 	<br>
 	<label style="color:{{ type_color }}"> {{data[backup_type]}} </label>
 	<table class="table table-bordered table-hover" id={{ backup_type }}>
@@ -75,22 +73,7 @@
 	      {% if loop.index == 1 %}
 	      <td style="background: {{ color }}" rowspan={{ cluster[cluster_name]|length() }} >{{ cluster_name }}</td>
 	      {% endif %}
-	      <td>
-		{% if ip %}
-		
-		{% if cluster[cluster_name][ip]['port'] %}
-		{% set port = cluster[cluster_name][ip]['port'] %}
-		{% else %}
-		{% set port = 'noport' %}
-		{% endif %}
-		{% set ip_port = ip + ':' + cluster[cluster_name][ip]['port'] %}
-		{% if backup_config[ip_port] %}
-		<a type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#modal_backup_configure" data-ip="{{ ip }}" data-port="{{ cluster[cluster_name][ip]['port'] }}" data-backup_mode="{{ backup_config[ip_port]['f_bak_mode'] }}" data-backup_database="{{ backup_config[ip_port]['backup_database'] }}" data-last_bak_time="{{ backup_config[ip_port]['L_bak_time'] }}" data-end_bak_time="{{ backup_config[ip_port]['end_time'] }}" data-next_bak_time="{{ backup_config[ip_port]['N_bak_time'] }}" data-keep_bak_time="{{ backup_config[ip_port]['f_bak_keep'] }}">
-		  {% endif %}
-		  {{ ip }}
-                </a>
-		{% endif %}
-	      </td>
+	      <td>{% if ip %}{{ ip }}{% endif %}</td>
 	      <td>{% if cluster[cluster_name][ip]['version'] %}{{ cluster[cluster_name][ip]['version']}}{% endif %}</td>
 	      <td>
                 {% if cluster[cluster_name][ip]['role'] %}
@@ -127,57 +110,85 @@
       </div>
       {% endfor %}
       
+
       <!-- Tab of MySQL and MongoDB -->      
-      {% for type in ['MySQL'] %}
+      {% for type in ['MySQL','MongoDB'] %}
       <div id="div_backup_{{type}}" style="display:none">
 	<br>
 	<br>
 	<table class="table table-bordered table-hover" id="table{{ type }}">
 	  <thead>
 	    <tr>
-	      <th>IP</th><th>Port</th><th>备份模式</th><th>备份状态</th><th>上次备份时间</th><th>下次备份时间</th>
+	      <th>IP</th><th>Port</th><th>备份模式</th><th>备份数据库</th>
+	      <th>备份保留(天)</th><th>上次备份时间</th><th>备份结束时间</th>
+	      <th>下次备份时间</th><th>备份是否开启</th><th>备份是否成功</th>
+	      <th>备份信息</th><th>开启/关闭备份</th><th>删除备份</th>
 	    </tr>
 	  </thead>
 	  <tbody>
-	    {% if backup_single_instance %}
-	    {% for instance in backup_single_instance | sort(attribute='ip') %}
+	    {% if data_instance['info'] %}
+	    {% set detail_data=data_instance['info'] %}
+	    {% for detail in detail_data | sort(attribute='ip') %}
+	    {% if detail['type']== type %}
 	    <tr>
+	      <td>{{ detail['ip'] }}</td>
+	      <td>{{ detail['port'] }}</td>
+	      <td>{{ detail['f_bak_mode'] }}</td>
+	      <td>{{ detail['backup_database'] }}</td>
+	      <td>{{ detail['f_bak_keep'] }}</td>
+	      <td>{{ detail['L_bak_time'] }}</td>
+	      <td>{{ detail['end_time'] }}</td>
 	      <td>
-		{% set ip_port = instance['ip'] + ':' + instance['port']|string %}
-		{% if backup_config[ip_port] %}
-		<a type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#modal_backup_configure" data-ip="{{ instance['ip'] }}" data-port="{{ instance['port'] }}" data-backup_mode="{{ backup_config[ip_port]['f_bak_mode'] }}" data-backup_database="{{ backup_config[ip_port]['backup_database'] }}" data-last_bak_time="{{ backup_config[ip_port]['L_bak_time'] }}" data-end_bak_time="{{ backup_config[ip_port]['end_time'] }}" data-next_bak_time="{{ backup_config[ip_port]['N_bak_time'] }}" data-keep_bak_time="{{ backup_config[ip_port]['f_bak_keep'] }}">
-		  {% endif %}
-		  {{ instance['ip'] }}
+		<a type="button" class="btn btn-default btn-xs" data-toggle="modal" data-target="#modal_instance" data-ip="{{ detail['ip'] }}" data-port="{{ detail['port'] }}">
+		  {{ detail['N_bak_time'] }}
+		</a>
 	      </td>
-	      <td>{{ instance['port'] }}</td>
-	      <td>{{ instance['f_bak_mode'] }}</td>
-	      {% if instance['status']=='成功'%}
+	      {% if detail['flag']=='开启' %}
 	      <td style="color:green">
-		{% elif instance['status']=='失败' %}
+                {% else %}
+	      <td style="color:red">
+                {% endif %}
+                {{ detail['flag'] }}
+	      </td>
+	      {% if detail['status']=='成功'%}
+	      <td style="color:green">
+		{% elif detail['status']=='失败' %}
 	      <td style="color:red">
                 {% else %}
 	      <td style="color:blue">
                 {% endif %}
-                {{ instance['status'] }}
+                {{ detail['status'] }}
 	      </td>
-	      <td>{{ instance['L_bak_time'] }}</td>
-	      <td>{{ instance['N_bak_time'] }}</td>
+	      <td>{{ detail['info'] }}</td>
+              <td>
+                <a type="button" {{disabled}} class="btn btn-primary btn-xs"
+		   href="{{ url_for('switch_flag',ip=detail.ip,port=detail.port) }}"
+		   onclick="return confirm('确认关闭/开启{{ detail.ip }}:{{ detail.port }}上的备份吗?')">
+		  开启/关闭备份
+                </a>
+	      </td>
+	      <td>
+                <a type="button" {{disabled}} class="btn btn-danger btn-xs"
+		   href="{{ url_for('del_backup',ip=detail.ip,port=detail.port,template='backup_report') }}"
+		   onclick="return confirm('确认删除{{ detail.ip }}:{{ detail.port }}上的备份吗?')" disabled>
+		  删除备份
+                </a>
+	      </td>
 	    </tr>
-
+	    {% endif %}
 	    {% endfor %}
 	    {% endif %}
 	  </tbody>
         </table>
       </div>
       {% endfor %}
-
       
     </div>
   </div>
 </div>
 
 
-<!-- add_backup Modal-->
+<!-- mysql_cluster Modal-->
 <div class="modal fade" id="modal_mysql_cluster" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content col-lg-16">
@@ -220,43 +231,30 @@
 </div>
 
 
-<!-- backup configure Modal-->
-<div class="modal fade" id="modal_backup_configure" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<!-- Modal-->
+<div class="modal fade" id="modal_instance" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="exampleModalLabel">备份参数配置</h4>
+        <h4 class="modal-title" id="exampleModalLabel">更改备份属性</h4>
       </div>
       <div class="modal-body">
-        <form action="set_backup_config" method="GET" role="form">
+        <form action="switch_flag" method="GET" role="form">
 	  <div class="form-group">
-	    <label for="ip" class="control-label">IP:Port</label>
-	    <input type="text" class="x-form-text x-form-field" id="show_ip_port" name="show_ip_port" disabled>
+	    <label for="ip" class="control-label">IP</label>
+	    <input type="text" class="form-control" id="show_ip" name="show_ip" disabled>
+	    <input type="text" class="form-control" id="ip" name="ip" style="visibility:hidden">
 	  </div>
 	  <div class="form-group">
-	    <label for="backup_mode" class="x-form-text x-form-field">备份模式</label>
-	    <input type="text" class="x-form-text x-form-field" id="backup_mode" name="backup_mode" disabled>
-	    <label for="backup_database" class="x-form-text x-form-field">备份数据库</label>
-	    <input type="text" class="x-form-text x-form-field" id="backup_database" name="backup_database" disabled>
+	    <label for="port" class="control-label">PORT</label>
+	    <input type="text" class="form-control" id="show_port" name="show_port" disabled>
+	    <input type="text" class="form-control" id="port" name="port" style="visibility:hidden">
 	  </div>
 	  <div class="form-group">
-	    <label for="last_bak_time" class="x-form-text x-form-field">上次备份时间</label>
-	    <input type="text" class="x-form-text x-form-field" id="last_bak_time" name="last_bak_time" disabled>
-	    <label for="end_bak_time" class="x-form-text x-form-field">备份结束时间</label>
-	    <input type="text" class="x-form-text x-form-field" id="end_bak_time" name="end_bak_time" disabled>
-	  </div>
-	  <div class="form-group">
-	    <label for="keep_bak_time" class="x-form-text x-form-field">备份保留天数</label>
-	    <input type="text" class="x-form-text x-form-field" id="keep_bak_time" name="keep_bak_time" disabled>
-	  </div>
-	  <div class="form-group">
-	    <label for="time" class="x-form-text x-form-field">下次备份时间</label>
+	    <label for="time" class=" x-form-text x-form-field">下次备份时间</label>
 	    <input id="time" onclick="laydate({istime: true, format: 'YYYY-MM-DD hh:mm:ss'})">
 	    <a>格式:YYYY-MM-DD HH:mm:ss</a><a id="warning" style="color: red"></a>
-
-	    <input type="text" class="x-form-text x-form-field" id="ip" name="ip" style="visibility:hidden">
-	    <input type="text" class="x-form-text x-form-field" id="port" name="port" style="visibility:hidden">
 	  </div>
 	  <div class="modal-footer">
 	    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
@@ -311,28 +309,17 @@
 				  })
 
 
-				  $('#modal_backup_configure').on('show.bs.modal', function (event) {
+				  $('#modal_instance').on('show.bs.modal', function (event) {
 				  var button = $(event.relatedTarget) // Button that triggered the modal
 				  var ip = button.data('ip')
 				  var port = button.data('port')
-				  var backup_mode = button.data('backup_mode')
-				  var backup_database = button.data('backup_database')
-				  var last_bak_time = button.data('last_bak_time')
-				  var end_bak_time = button.data('end_bak_time')
-				  var next_bak_time = button.data('next_bak_time')
-				  var keep_bak_time = button.data('keep_bak_time')
-
 				  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
 				  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
 				  var modal = $(this)
 				  modal.find('.modal-body #ip').val(ip)
-				  modal.find('.modal-body #show_ip_port').val(ip+':'+port)
+				  modal.find('.modal-body #show_ip').val(ip)
 				  modal.find('.modal-body #port').val(port)
-				  modal.find('.modal-body #backup_mode').val(backup_mode)
-				  modal.find('.modal-body #backup_database').val(backup_database)
-				  modal.find('.modal-body #last_bak_time').val(last_bak_time)
-				  modal.find('.modal-body #end_bak_time').val(end_bak_time)
-				  modal.find('.modal-body #keep_bak_time').val(keep_bak_time)
+				  modal.find('.modal-body #show_port').val(port)
 				  modal.find('.modal-body #time').val('')
 				  $('#submit').attr("disabled", "disabled");
 				  $('#warning')[0].innerHTML = ''

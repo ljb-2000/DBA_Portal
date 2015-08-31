@@ -67,7 +67,7 @@ class InstList(CmdbApiBase):
         result = self.__call_interface__('CMDB', 'init_instance_flow', json_obj=info, timeout=1000)
         return result
 
-    def get_total_cnt(self):
+    def get_total_count(self):
         result = self.__call_interface__('CMDB', 'getinstancecount')
         return result
 

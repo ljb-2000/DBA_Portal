@@ -2,11 +2,15 @@ from cmdb_api_base import CmdbApiBase
 
 class BackupList(CmdbApiBase):
     def mha(self):
-        result = self.__call_interface__('BACKUP','backup_info',json_obj=None)
+        result = self.__call_interface__('BACKUP','backup_info/Mysql_Cluster',json_obj=None)
         return result
 
-    def backup_configure(self):
-        result = self.__call_interface__('BACKUP','backup_report',json_obj=None)
+    def single_instance(self):
+        result = self.__call_interface__('BACKUP','backup_info/Single',json_obj=None)
+        return result
+
+    def configure(self):
+        result = self.__call_interface__('BACKUP','get_config',json_obj=None)
         return result
 
     def email_backup_report(self):
